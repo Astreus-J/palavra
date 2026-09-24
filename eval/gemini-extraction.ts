@@ -50,12 +50,23 @@ const gm = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel
   generationConfig: { responseMimeType: "application/json", responseSchema: schema as never, temperature: 0 },
 });
 
+// 503/429 são transitórios (alta demanda): repete com backoff, como fará o bot em produção.
+let retries = 0;
+async function gerar(prompt: string): Promise<string> {
+  for (let i = 0; ; i++) {
+    try { return (await gm.generateContent(prompt)).response.text(); }
+    catch (e) {
+      if (i >= 5 || !/\[(503|429)/.test(String(e))) throw e;
+      retries++; await new Promise((r) => setTimeout(r, 2000 * 2 ** i));
+    }
+  }
+}
 let erroMostrado = false;
 let valido = 0, tipoOk = 0, prazoOk = 0, prazoTotal = 0, respOk = 0, respTotal = 0;
 const t0 = Date.now();
 for (const c of CASOS) {
   let out: { tipo?: Tipo; responsavel?: string | null; prazo?: string | null } | null = null;
-  try { out = JSON.parse((await gm.generateContent(`Autor: ${c.autor}\nMensagem: ${c.msg}`)).response.text()); valido++; } catch (e) { if (!erroMostrado) { console.log("ERRO:", String(e).slice(0, 300)); erroMostrado = true; } }
+  try { out = JSON.parse(await gerar(`Autor: ${c.autor}\nMensagem: ${c.msg}`)); valido++; } catch (e) { if (!erroMostrado) { console.log("ERRO:", String(e).slice(0, 300)); erroMostrado = true; } }
   const okTipo = out?.tipo === c.tipo; if (okTipo) tipoOk++;
   let okPrazo = "—", okResp = "—";
   if (c.prazo) { prazoTotal++; const ok = out?.prazo === c.prazo; if (ok) prazoOk++; okPrazo = ok ? "ok" : `X (${out?.prazo})`; }
@@ -63,5 +74,5 @@ for (const c of CASOS) {
   console.log(`${okTipo ? "✔" : "✘"} ${c.tipo.padEnd(11)} obtido=${String(out?.tipo).padEnd(11)} prazo=${okPrazo} resp=${okResp} | ${c.msg}`);
 }
 const pct = (a: number, b: number) => `${a}/${b} (${Math.round((100 * a) / b)}%)`;
-console.log(`\nmodelo=${model} casos=${CASOS.length} tempo=${((Date.now() - t0) / 1000).toFixed(1)}s`);
+console.log(`\nmodelo=${model} casos=${CASOS.length} retries=${retries} tempo=${((Date.now() - t0) / 1000).toFixed(1)}s`);
 console.log(`JSON válido: ${pct(valido, CASOS.length)} | tipo: ${pct(tipoOk, CASOS.length)} | prazo: ${pct(prazoOk, prazoTotal)} | responsável: ${pct(respOk, respTotal)}`);
