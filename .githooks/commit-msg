@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# Conventional Commits: tipo(escopo opcional): descrição
+msg_file="$1"
+first_line=$(head -n1 "$msg_file")
+case "$first_line" in
+  Merge\ *|Revert\ *) exit 0 ;;
+esac
+if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)(\([a-z0-9._-]+\))?!?: .{3,}'; then
+  echo "Mensagem de commit inválida. Use Conventional Commits:" >&2
+  echo "  feat(core): adiciona State Resolver" >&2
+  echo "Tipos: feat fix docs chore refactor test perf ci build style" >&2
+  exit 1
+fi
