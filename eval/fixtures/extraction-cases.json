@@ -1,0 +1,25 @@
+{
+  "today": "2026-09-24 (Thursday)",
+  "cases": [
+    { "author": "Maria", "msg": "Eu envio o orçamento até sexta", "type": "COMMITMENT", "owner": "Maria", "due": "2026-09-25" },
+    { "author": "Lucas", "msg": "O Pedro vai finalizar o backend até dia 30", "type": "COMMITMENT", "owner": "Pedro", "due": "2026-09-30" },
+    { "author": "Maria", "msg": "Decidimos que a entrega será dia 30/09", "type": "DECISION", "due": "2026-09-30" },
+    { "author": "Maria", "msg": "Na verdade envio sábado", "type": "AMENDMENT", "owner": "Maria", "due": "2026-09-26" },
+    { "author": "Pedro", "msg": "Terminei o backend", "type": "COMPLETION", "owner": "Pedro" },
+    { "author": "João", "msg": "Pessoal, bom dia!", "type": "NONE" },
+    { "author": "Lucas", "msg": "Fica combinado: reunião segunda às 10h", "type": "DECISION", "due": "2026-09-28" },
+    { "author": "João", "msg": "Vou mandar a identidade visual amanhã", "type": "COMMITMENT", "owner": "João", "due": "2026-09-25" },
+    { "author": "Maria", "msg": "Adiei pra semana que vem, segunda", "type": "AMENDMENT", "owner": "Maria", "due": "2026-09-28" },
+    { "author": "Maria", "msg": "Já enviei o orçamento", "type": "COMPLETION", "owner": "Maria" },
+    { "author": "Lucas", "msg": "Ficou decidido usar Postgres no projeto", "type": "DECISION" },
+    { "author": "João", "msg": "Acho que a gente devia usar React", "type": "NONE" },
+    { "author": "Lucas", "msg": "A Ana fica responsável pelo design, prazo 02/10", "type": "COMMITMENT", "owner": "Ana", "due": "2026-10-02" },
+    { "author": "Pedro", "msg": "Mudou: o prazo do backend agora é dia 5 de outubro", "type": "AMENDMENT", "owner": "Pedro", "due": "2026-10-05" },
+    { "author": "Ana", "msg": "Concluí o design ontem", "type": "COMPLETION", "owner": "Ana" },
+    { "author": "Maria", "msg": "Quem ficou com o orçamento?", "type": "NONE" },
+    { "author": "Sam", "msg": "I'll send the budget by Friday", "type": "COMMITMENT", "owner": "Sam", "due": "2026-09-25" },
+    { "author": "Sam", "msg": "Actually, I'll send it on Saturday", "type": "AMENDMENT", "owner": "Sam", "due": "2026-09-26" },
+    { "author": "Kim", "msg": "We agreed the launch is on October 12", "type": "DECISION", "due": "2026-10-12" },
+    { "author": "Kim", "msg": "Done, the landing page is live", "type": "COMPLETION", "owner": "Kim" }
+  ]
+}

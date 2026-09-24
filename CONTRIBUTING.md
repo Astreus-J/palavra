@@ -6,7 +6,7 @@ error messages, test names, docs, `.env.example`, git hook messages, commit mess
 requests. The hackathon is international and the repository is public.
 
 - Exception: Portuguese chat samples used as test data, kept under a `fixtures/` directory.
-- The bot answers each user in the user's own language, but source strings and prompts are English.
+- The bot **always replies in English** (decision D-08), even when group members write in Portuguese; source strings and prompts are English too.
 - Team chat and the internal Plane board may use Portuguese.
 - The `pre-commit` and `commit-msg` hooks reject accented Portuguese text outside `fixtures/`.
 
