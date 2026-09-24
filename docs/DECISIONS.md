@@ -1,14 +1,15 @@
-# Decisões (registro)
+# Decision log
 
-| ID | Decisão | Status | Motivo |
+| ID | Decision | Status | Reason |
 |---|---|---|---|
-| D-01 | O ledger SQLite é **cache reconstruível** do Walrus, nunca fonte única | Proposta | Regra oficial: memória armazenada exclusivamente no Walrus. O teste de restore (apagar SQLite → `restore` → estado igual) prova conformidade |
-| D-02 | Não usar `analyze`; gravar fato estruturado com `remember` | Aceita | Preserva tipo, id e supersessão |
-| D-03 | Estado atual resolvido por código, não por LLM nem por recall puro | Aceita | Determinismo; recall pode voltar vazio |
-| D-04 | Canal inicial: Telegram | Aceita | Sem risco de banimento; privacy mode limita ao que é endereçado ao bot |
-| D-05 | LLM único: Gemini | A confirmar (modelo exato) | Trilha Beyond the Big Two; Gemini está na lista oficial |
-| D-06 | Namespace `grp:<chat_id>` sob uma conta do bot | Aceita | Isolamento é por owner + namespace |
-| D-07 | Uma submissão por equipe | Regra oficial | Definir quem submete e qual carteira recebe |
-| D-08 | Artigo em inglês (Medium ou Inkray); produto em PT-BR | A confirmar | Júri internacional |
-| D-09 | Repositório público novo em `hackatons/palavra/` | A criar | Exigência de repo público; hackmemo não é alterado |
-| D-10 | Promo Prize: divulgar em espaços não afiliados a Walrus/Sui | Nova | X e r/sui não contam |
+| D-01 | The SQLite ledger is a **rebuildable cache** of Walrus, never the only source | Proposed | Official rule: memory stored exclusively on Walrus. The restore test (delete SQLite → `restore` → same state) proves compliance |
+| D-02 | Do not use `analyze`; write structured facts with `remember` | Accepted | Preserves type, id and supersession |
+| D-03 | Current state is resolved in code, not by an LLM nor by plain recall | Accepted | Determinism; recall can come back empty |
+| D-04 | Channel: Telegram first; the core is channel-agnostic so WhatsApp (Baileys) can be added later | Accepted | Bot created (@Palavra_paradevs_bot), privacy mode on. WhatsApp via Baileys carries ban risk and unreliable buttons |
+| D-05 | Single LLM: Gemini. Exact model still open | To confirm | "Beyond the Big Two" track. `gemini-2.5-flash-lite` scored 100% valid JSON and 100% type accuracy on the extraction check; newer models were overloaded (503). Free-tier quota (429) limits further testing |
+| D-06 | Namespace `grp:<chat_id>` under one bot account | Accepted | Isolation is per owner + namespace |
+| D-07 | One submission per team | Official rule | Define who submits and which wallet receives the prize |
+| D-08 | English everywhere in the repository; the bot answers in the user's language | Accepted | International hackathon, public repo (see CONTRIBUTING.md) |
+| D-09 | New public repository at `github.com/Astreus-J/palavra` | Done | Public repo is mandatory |
+| D-10 | Promo Prize: promote in spaces not affiliated with Walrus/Sui | New | X and r/sui do not count |
+| D-11 | English fact types (`DECISION`, `COMMITMENT`, `AMENDMENT`, `COMPLETION`) and English commands (`/palavra`, `/pending`, `/history`, `/decisions`) | Accepted | Follows D-08 |

@@ -1,8 +1,21 @@
 #!/usr/bin/env sh
-# Bloqueia segredos: arquivos .env e padrões de chaves em mudanças em stage.
+# 1) Block secrets. 2) Enforce English in code and docs.
+
+# --- secrets ---
 if git diff --cached --name-only | grep -Eq '(^|/)\.env($|\.)' && ! git diff --cached --name-only | grep -Eq '\.env\.example$'; then
-  echo "Bloqueado: .env não pode ser commitado." >&2; exit 1
+  echo "Blocked: .env must not be committed." >&2; exit 1
 fi
-if git diff --cached -U0 | grep -E '^\+' | grep -Eq '(suiprivkey1[a-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}|[0-9]{8,10}:AA[0-9A-Za-z_-]{30,}|plane_api_[0-9a-f]{20,})'; then
-  echo "Bloqueado: possível segredo (Sui/Gemini/Telegram/Plane) nas mudanças." >&2; exit 1
+if git diff --cached -U0 | grep -E '^\+' | grep -Eq '(suiprivkey1[a-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}|AQ\.[0-9A-Za-z_-]{30,}|[0-9]{8,10}:AA[0-9A-Za-z_-]{30,}|plane_api_[0-9a-f]{20,})'; then
+  echo "Blocked: possible secret (Sui/Gemini/Telegram/Plane) in the staged changes." >&2; exit 1
+fi
+
+# --- language policy: added lines must not contain Portuguese accented letters ---
+# Exempt: test data under any fixtures/ directory (chat samples in Portuguese are intentional).
+pt=$(git diff --cached -U0 --diff-filter=AM -- . ':(exclude)*/fixtures/*' ':(exclude).githooks/*' ':(exclude)package-lock.json' ':(exclude)*.pdf' \
+  | grep -E '^\+[^+]' | grep -E '[áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]' | head -5)
+if [ -n "$pt" ]; then
+  echo "Blocked: non-English text found. This repository is English-only (see CONTRIBUTING.md)." >&2
+  echo "$pt" >&2
+  echo "Put Portuguese test data in a fixtures/ directory if it is intentional." >&2
+  exit 1
 fi

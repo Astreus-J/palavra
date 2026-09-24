@@ -1,85 +1,82 @@
-# Walrus Sessions 8 — Chatbots That Remember (regras oficiais)
+# Walrus Sessions 8 — Chatbots That Remember (official rules)
 
-Fonte: https://thewalrussessions.wal.app/chatbots/index.html (lida em 24/09/2026).
-Este documento substitui as suposições de `STRATEGY.md` onde houver divergência.
+Source: https://thewalrussessions.wal.app/chatbots/index.html (read on 2026-09-24).
+Where this differs from earlier assumptions, this document wins.
 
-## Datas
-- Início: 18/09/2026 09:00 UTC
-- **Fim: 09/10/2026 14:00 UTC (11:00 em Brasília)**
-- Resultados: 16/10/2026
-- Prêmio: reivindicar com carteira compatível com WAL em até **21 dias** após o anúncio
+## Dates
+- Start: 2026-09-18 09:00 UTC
+- **End: 2026-10-09 14:00 UTC (11:00 in Brasilia)**
+- Results: 2026-10-16
+- Prize claim: wallet compatible with WAL within **21 days** after the announcement
 
-## Elegibilidade
-- 18+ (ou maioridade local); fora de jurisdições sancionadas
-- **Uma submissão por pessoa ou equipe**
-- Registro obrigatório na plataforma DeepSurge
-- Dados do cadastro: nome do projeto, descrição do chatbot (função, público, problema), contato principal, conta GitHub
+## Eligibility
+- 18+ (or age of majority locally); not in sanctioned jurisdictions
+- **One submission per person or team**
+- Registration on the DeepSurge platform is mandatory
+- Registration data: project name, chatbot description (function, target users, problem solved), primary contact, GitHub account
 
-## Requisitos técnicos (obrigatórios)
-- Chatbot funcional integrado ao Walrus Memory
-- **Deploy em mainnet, com a memória armazenada exclusivamente no Walrus**
-- **Mínimo de 10 blobs escritos na hora da submissão** (informar o agent ID como prova)
-- Acessível a usuários reais por ao menos um canal (web, Telegram, Discord, WhatsApp, Slack, CLI)
-- Repositório GitHub **público**, com código e instruções de setup
-- Documentar qual LLM foi usado
+## Technical requirements (mandatory)
+- Working chatbot integrated with Walrus Memory
+- **Deployed on mainnet, with memory stored exclusively on Walrus**
+- **At least 10 blobs written at submission time** (provide the agent ID as proof)
+- Reachable by real users through at least one channel (web widget, Telegram, Discord, WhatsApp, Slack, CLI)
+- **Public** GitHub repository with source code and setup instructions
+- Document which LLM was used
 
-> Atenção ao "exclusivamente no Walrus": o ledger local do Palavra (SQLite) deve ser um
-> **cache reconstruível** a partir do Walrus, nunca a fonte única. Ver decisão D-01 em
-> `DECISIONS.md`.
+> Note on "stored exclusively on Walrus": the local SQLite ledger must be a **rebuildable
+> cache** of Walrus, never the only source. See decision D-01 in `DECISIONS.md`.
 
-## Critérios de julgamento (4)
-1. **Genuine Memory Functionality:** a memória entrega valor tangível, não estético? Recupera a informação certa na hora certa?
-2. **Real-World Deployment & Impact:** há uso real? O antes/depois convence? A documentação prova melhoria mensurável?
-3. **Build Quality & Reproducibility:** integração bem estruturada, documentada e clonável por outro dev?
-4. **Article Excellence:** o texto ajuda iniciantes e motiva outros a construir algo parecido? (clareza, candura, utilidade)
+## Judging criteria (4)
+1. **Genuine Memory Functionality** — does memory deliver tangible value rather than aesthetics? Does the bot retrieve the right information at the right time?
+2. **Real-World Deployment & Impact** — evidence of real usage; does the before/after convince; does the documentation prove a measurable improvement?
+3. **Build Quality & Reproducibility** — is the integration well structured, documented and cloneable by other developers?
+4. **Article Excellence** — does the piece help newcomers and motivate others to build similar things (clarity, candor, usefulness)?
 
-Júri indicado pela Walrus Foundation; decisões finais.
+The panel is appointed by the Walrus Foundation; decisions are final.
 
-## Trilhas e prêmios (pool total: $2.500 em WAL)
+## Tracks and prizes (total pool: $2,500 in WAL)
 
-| Trilha | Vencedores | Prêmio | Como se concorre |
+| Track | Winners | Prize | How to compete |
 |---|---|---|---|
-| Best Chatbot | 3 | 500 / 250 / 150 | avaliação geral pelos 4 critérios |
-| Beyond the Big Two | 2 | 150 cada | LLM principal que não é Anthropic nem OpenAI; documentar modelo e runtime e o atrito de integração. Acumula com Best Chatbot |
-| Best Article | 3 | 100 cada | clareza, candura e utilidade para iniciantes |
-| **Promo Prize** | 5 | 100 cada | divulgação em espaços de terceiros (subreddits, fóruns, Discords, newsletters, plataformas). **Não vale** X, r/sui, r/walrus nem canais afiliados a Walrus/Sui. Precisa estar público no julgamento |
-| Bug Bounty | 5 | 100 cada | issues de qualidade em github.com/MystenLabs/MemWal abertas durante o evento |
+| Best Chatbot | 3 | 500 / 250 / 150 | overall evaluation across the 4 criteria |
+| Beyond the Big Two | 2 | 150 each | primary LLM that is not Anthropic or OpenAI; document model, runtime and integration friction. Stacks with Best Chatbot |
+| Best Article | 3 | 100 each | clarity, candor, usefulness for newcomers |
+| **Promo Prize** | 5 | 100 each | promotion in third-party spaces (subreddits, forums, Discords, newsletters, publishing platforms). **Not valid:** X, r/sui, r/walrus or Walrus/Sui-affiliated channels. Must be public at judging time |
+| Bug Bounty | 5 | 100 each | quality issues at github.com/MystenLabs/MemWal opened during the event |
 
-Modelos elegíveis em Beyond the Big Two: open-weight locais (Llama, Mistral, Qwen, Gemma,
-DeepSeek, Phi via Ollama, LM Studio, llama.cpp, vLLM), provedores alternativos (Google
-Gemini, Mistral API, xAI Grok, DeepSeek API, Cohere, Groq, Together, Fireworks,
-OpenRouter) e modelos ajustados/customizados.
+Eligible models for Beyond the Big Two: local open-weight models (Llama, Mistral, Qwen, Gemma,
+DeepSeek, Phi via Ollama, LM Studio, llama.cpp, vLLM), alternative hosted providers (Google
+Gemini, Mistral API, xAI Grok, DeepSeek API, Cohere, Groq, Together, Fireworks, OpenRouter)
+and fine-tuned or custom models.
 
-Padrão de issue do Bug Bounty: passos de reprodução, esperado vs. obtido, ambiente
-(modelo, runtime, SO, versão do SDK). Quem escolhe é o time de engenharia da Walrus,
-por qualidade e "actionability".
+Bug Bounty issue standard: reproduction steps, expected vs. actual behavior, environment
+(model, runtime, OS, SDK version). Winners are picked by the Walrus engineering team on quality
+and actionability.
 
-## Processo de submissão
-1. Preencher o formulário Airtable: https://airtable.com/appoDAKpC74UOqoDa/shro5iVzzjoWfZlPK
-2. Submeter na DeepSurge
-3. Informar **carteira dedicada criada para as Sessions**
-4. Link do repositório público (código + setup)
-5. Documentar a escolha de LLM
+## Submission process
+1. Fill in the Airtable form: https://airtable.com/appoDAKpC74UOqoDa/shro5iVzzjoWfZlPK
+2. Submit on DeepSurge
+3. Provide the **dedicated wallet address created for the Sessions**
+4. Link the public repository (code + setup)
+5. Document the LLM choice
 
-## Documentação exigida
-- Artigo no **Medium ou Inkray** explicando: o que o chatbot faz, como integra o Walrus Memory, o que mudou de comportamento, evidência de uso real (prints, logs, vídeo ou link vivo)
-- **Formulário de feedback do Walrus Memory** com no mínimo 1 bug/atrito e 1 ideia de melhoria
-- Issues no GitHub do MemWal
-- Entrar no Discord da Walrus
-- Compartilhar o artigo no X marcando **@WalrusProtocol** com **#WalrusMemory**
+## Required documentation
+- Article on **Medium or Inkray** explaining: what the bot does, how it integrates Walrus Memory, what changed in behavior, real-use evidence (screenshots, logs, video or a live link)
+- **Walrus Memory feedback form** with at least one bug/friction point and one improvement idea
+- Issues on the MemWal GitHub repository
+- Join the Walrus Discord
+- Share the article on X tagging **@WalrusProtocol** with **#WalrusMemory**
 
 ## Links
 - Bug bounty / promo-only (WalForm): https://walform.wal.app/f?formId=0x38a736485349b133604c1caf286d669b4b774d16f0a26120ce839cad245baeef
 - Issues: https://github.com/MystenLabs/MemWal
 - Discord: https://discord.com/invite/walrusprotocol
-- Termos: https://docs.wal.app/docs/legal/walrus_general_tos · https://docs.wal.app/docs/legal/privacy
-- Docs Walrus Memory: https://docs.wal.app/walrus-memory
+- Terms: https://docs.wal.app/docs/legal/walrus_general_tos · https://docs.wal.app/docs/legal/privacy
+- Walrus Memory docs: https://docs.wal.app/walrus-memory
 
-## O que a pesquisa anterior tinha errado ou não sabia
-- "≥3 usuários com ≥10 memórias cada" **não aparece** nas regras oficiais. O requisito é
-  ≥10 blobs no total e uso por usuários reais. Manter os 3 usuários como meta interna
-  (é bom para o critério 2), não como exigência.
-- Existe a trilha **Promo Prize** (5 × $100), que eu não tinha listado.
-- O Bug Bounty pede issues no GitHub da MemWal (não "bug de SEAL" específico) e há
-  formulário de feedback obrigatório com pelo menos 1 bug/atrito.
-- Não há menção a "produção real" como pré-requisito de prêmio, mas o critério 2 pesa uso real.
+## Corrections to earlier research
+- "≥3 users with ≥10 memories each" is **not** in the official rules. The requirement is ≥10
+  blobs in total plus real users. We keep 3 users as an internal goal (good for criterion 2).
+- A **Promo Prize** track exists (5 × $100).
+- The Bug Bounty asks for GitHub issues on MemWal, and the feedback form is mandatory.
+- "Production deployment" is not a prize prerequisite, but criterion 2 rewards real usage.

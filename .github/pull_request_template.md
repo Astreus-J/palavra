@@ -1,14 +1,15 @@
-## Tarefa
-Plane: HACKATONSU-<número>
+## Task
+Plane: HACKATONSU-<number>
 
-## O que muda
-<!-- descrição curta -->
+## What changes
+<!-- short description -->
 
-## Critérios de aceite
-<!-- copie os critérios da tarefa e marque -->
+## Acceptance criteria
+<!-- copy the criteria from the task and tick them -->
 - [ ]
 
 ## Checklist
-- [ ] `npm run typecheck` e `npm test` passam
-- [ ] Sem segredos ou dados pessoais no diff
-- [ ] Docs atualizadas (se aplicável)
+- [ ] `npm run typecheck` and `npm test` pass
+- [ ] No secrets or personal data in the diff
+- [ ] Everything is in English
+- [ ] Docs updated (if applicable)

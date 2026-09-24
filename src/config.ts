@@ -21,7 +21,7 @@ const schema = z
   .superRefine((env, ctx) => {
     if (env.MEMWAL_MODE !== "real") return;
     for (const key of ["MEMWAL_PRIVATE_KEY", "MEMWAL_ACCOUNT_ID"] as const) {
-      if (!env[key]) ctx.addIssue({ code: "custom", path: [key], message: `obrigatória com MEMWAL_MODE=real` });
+      if (!env[key]) ctx.addIssue({ code: "custom", path: [key], message: `required when MEMWAL_MODE=real` });
     }
   });
 
@@ -31,14 +31,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const parsed = schema.safeParse(env);
   if (!parsed.success) {
     const lines = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`);
-    throw new Error(`Configuração inválida (.env):\n${lines.join("\n")}`);
+    throw new Error(`Invalid configuration (.env):\n${lines.join("\n")}`);
   }
   return parsed.data;
 }
 
-// Necessárias só para rodar o bot (não para testes/eval com mock).
+// Only needed to run the bot (not for tests/eval with the mock).
 export function requireBotSecrets(cfg: Config): { telegramToken: string; geminiApiKey: string; geminiModel: string } {
   const missing = (["TELEGRAM_BOT_TOKEN", "GEMINI_API_KEY", "GEMINI_MODEL"] as const).filter((k) => !cfg[k]);
-  if (missing.length) throw new Error(`Faltam variáveis para iniciar o bot: ${missing.join(", ")}`);
+  if (missing.length) throw new Error(`Missing variables to start the bot: ${missing.join(", ")}`);
   return { telegramToken: cfg.TELEGRAM_BOT_TOKEN!, geminiApiKey: cfg.GEMINI_API_KEY!, geminiModel: cfg.GEMINI_MODEL! };
 }
