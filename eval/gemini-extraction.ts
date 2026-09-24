@@ -1,78 +1,73 @@
-// Valida o modelo Gemini na extração de fatos (tarefa HACKATONSU-9, decisão D-05).
-// Uso: GEMINI_MODEL=gemini-2.5-flash npx tsx eval/gemini-extraction.ts
+// Validates a Gemini model on fact extraction (task HACKATONSU-9, decision D-05).
+// Usage: GEMINI_MODEL=<model> npx tsx eval/gemini-extraction.ts
+// Test messages live in eval/fixtures/ (Portuguese and English chat samples).
 import "dotenv/config";
+import { readFileSync } from "node:fs";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-const TODAY = "2026-09-24 (quinta-feira)";
-type Tipo = "DECISAO" | "COMPROMISSO" | "ALTERACAO" | "CONCLUSAO" | "NENHUM";
-interface Caso { autor: string; msg: string; tipo: Tipo; resp?: string; prazo?: string }
+type FactType = "DECISION" | "COMMITMENT" | "AMENDMENT" | "COMPLETION" | "NONE";
+interface Case { author: string; msg: string; type: FactType; owner?: string; due?: string }
 
-// Casos sintéticos, escritos para cobrir a variedade de linguagem natural de grupos em PT-BR.
-const CASOS: Caso[] = [
-  { autor: "Maria", msg: "Eu envio o orçamento até sexta", tipo: "COMPROMISSO", resp: "Maria", prazo: "2026-09-25" },
-  { autor: "Lucas", msg: "O Pedro vai finalizar o backend até dia 30", tipo: "COMPROMISSO", resp: "Pedro", prazo: "2026-09-30" },
-  { autor: "Maria", msg: "Decidimos que a entrega será dia 30/09", tipo: "DECISAO", prazo: "2026-09-30" },
-  { autor: "Maria", msg: "Na verdade envio sábado", tipo: "ALTERACAO", resp: "Maria", prazo: "2026-09-26" },
-  { autor: "Pedro", msg: "Terminei o backend", tipo: "CONCLUSAO", resp: "Pedro" },
-  { autor: "João", msg: "Pessoal, bom dia!", tipo: "NENHUM" },
-  { autor: "Lucas", msg: "Fica combinado: reunião segunda às 10h", tipo: "DECISAO", prazo: "2026-09-28" },
-  { autor: "João", msg: "Vou mandar a identidade visual amanhã", tipo: "COMPROMISSO", resp: "João", prazo: "2026-09-25" },
-  { autor: "Maria", msg: "Adiei pra semana que vem, segunda", tipo: "ALTERACAO", resp: "Maria", prazo: "2026-09-28" },
-  { autor: "Maria", msg: "Já enviei o orçamento", tipo: "CONCLUSAO", resp: "Maria" },
-  { autor: "Lucas", msg: "Ficou decidido usar Postgres no projeto", tipo: "DECISAO" },
-  { autor: "João", msg: "Acho que a gente devia usar React", tipo: "NENHUM" },
-  { autor: "Lucas", msg: "A Ana fica responsável pelo design, prazo 02/10", tipo: "COMPROMISSO", resp: "Ana", prazo: "2026-10-02" },
-  { autor: "Pedro", msg: "Mudou: o prazo do backend agora é dia 5 de outubro", tipo: "ALTERACAO", resp: "Pedro", prazo: "2026-10-05" },
-  { autor: "Ana", msg: "Concluí o design ontem", tipo: "CONCLUSAO", resp: "Ana" },
-  { autor: "Maria", msg: "Quem ficou com o orçamento?", tipo: "NENHUM" },
-];
+const fixtures = JSON.parse(readFileSync(new URL("./fixtures/extraction-cases.json", import.meta.url), "utf8")) as { today: string; cases: Case[] };
+const CASES = fixtures.cases;
 
 const schema = {
   type: SchemaType.OBJECT,
   properties: {
-    tipo: { type: SchemaType.STRING, format: "enum", enum: ["DECISAO", "COMPROMISSO", "ALTERACAO", "CONCLUSAO", "NENHUM"] },
-    responsavel: { type: SchemaType.STRING, nullable: true },
-    tarefa: { type: SchemaType.STRING, nullable: true },
-    prazo: { type: SchemaType.STRING, nullable: true, description: "AAAA-MM-DD ou null" },
+    type: { type: SchemaType.STRING, format: "enum", enum: ["DECISION", "COMMITMENT", "AMENDMENT", "COMPLETION", "NONE"] },
+    owner: { type: SchemaType.STRING, nullable: true },
+    task: { type: SchemaType.STRING, nullable: true },
+    due: { type: SchemaType.STRING, nullable: true, description: "YYYY-MM-DD or null" },
   },
-  required: ["tipo"],
+  required: ["type"],
 };
 
-const system = `Você extrai fatos de mensagens de um grupo de trabalho em português do Brasil.
-Hoje é ${TODAY}. Tipos: DECISAO (decisão do grupo), COMPROMISSO (alguém assume uma tarefa),
-ALTERACAO (muda prazo/tarefa já combinada), CONCLUSAO (alguém terminou algo), NENHUM (conversa, opinião ou pergunta).
-Quem escreve é o "autor"; "eu" refere-se ao autor. Converta prazos relativos para AAAA-MM-DD. Não invente dados.`;
+const system = `You extract facts from messages of a work group chat. Messages may be in Portuguese or English.
+Today is ${fixtures.today}. Types: DECISION (a group decision), COMMITMENT (someone takes a task),
+AMENDMENT (changes a deadline or task that was already agreed), COMPLETION (someone finished something),
+NONE (small talk, opinion or question). The person writing is the "author"; "I"/"eu" refers to the author.
+Convert relative deadlines to YYYY-MM-DD. Do not invent data.`;
 
 const model = process.env.GEMINI_MODEL;
-if (!model || !process.env.GEMINI_API_KEY) throw new Error("Defina GEMINI_MODEL e GEMINI_API_KEY");
+if (!model || !process.env.GEMINI_API_KEY) throw new Error("Set GEMINI_MODEL and GEMINI_API_KEY");
 const gm = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({
-  model, systemInstruction: system,
+  model,
+  systemInstruction: system,
   generationConfig: { responseMimeType: "application/json", responseSchema: schema as never, temperature: 0 },
 });
 
-// 503/429 são transitórios (alta demanda): repete com backoff, como fará o bot em produção.
+// 503/429 are transient (high demand / quota): retry with backoff, as the bot will in production.
 let retries = 0;
-async function gerar(prompt: string): Promise<string> {
+async function generate(prompt: string): Promise<string> {
   for (let i = 0; ; i++) {
-    try { return (await gm.generateContent(prompt)).response.text(); }
-    catch (e) {
+    try {
+      return (await gm.generateContent(prompt)).response.text();
+    } catch (e) {
       if (i >= 5 || !/\[(503|429)/.test(String(e))) throw e;
-      retries++; await new Promise((r) => setTimeout(r, 2000 * 2 ** i));
+      retries++;
+      await new Promise((r) => setTimeout(r, 2000 * 2 ** i));
     }
   }
 }
-let erroMostrado = false;
-let valido = 0, tipoOk = 0, prazoOk = 0, prazoTotal = 0, respOk = 0, respTotal = 0;
+
+let errorShown = false;
+let valid = 0, typeOk = 0, dueOk = 0, dueTotal = 0, ownerOk = 0, ownerTotal = 0;
 const t0 = Date.now();
-for (const c of CASOS) {
-  let out: { tipo?: Tipo; responsavel?: string | null; prazo?: string | null } | null = null;
-  try { out = JSON.parse(await gerar(`Autor: ${c.autor}\nMensagem: ${c.msg}`)); valido++; } catch (e) { if (!erroMostrado) { console.log("ERRO:", String(e).slice(0, 300)); erroMostrado = true; } }
-  const okTipo = out?.tipo === c.tipo; if (okTipo) tipoOk++;
-  let okPrazo = "—", okResp = "—";
-  if (c.prazo) { prazoTotal++; const ok = out?.prazo === c.prazo; if (ok) prazoOk++; okPrazo = ok ? "ok" : `X (${out?.prazo})`; }
-  if (c.resp) { respTotal++; const ok = out?.responsavel === c.resp; if (ok) respOk++; okResp = ok ? "ok" : `X (${out?.responsavel})`; }
-  console.log(`${okTipo ? "✔" : "✘"} ${c.tipo.padEnd(11)} obtido=${String(out?.tipo).padEnd(11)} prazo=${okPrazo} resp=${okResp} | ${c.msg}`);
+for (const c of CASES) {
+  let out: { type?: FactType; owner?: string | null; due?: string | null } | null = null;
+  try {
+    out = JSON.parse(await generate(`Author: ${c.author}\nMessage: ${c.msg}`));
+    valid++;
+  } catch (e) {
+    if (!errorShown) { console.log("ERROR:", String(e).slice(0, 300)); errorShown = true; }
+  }
+  const okType = out?.type === c.type;
+  if (okType) typeOk++;
+  let okDue = "-", okOwner = "-";
+  if (c.due) { dueTotal++; const ok = out?.due === c.due; if (ok) dueOk++; okDue = ok ? "ok" : `X (${out?.due})`; }
+  if (c.owner) { ownerTotal++; const ok = out?.owner === c.owner; if (ok) ownerOk++; okOwner = ok ? "ok" : `X (${out?.owner})`; }
+  console.log(`${okType ? "✔" : "✘"} ${c.type.padEnd(11)} got=${String(out?.type).padEnd(11)} due=${okDue} owner=${okOwner} | ${c.msg}`);
 }
 const pct = (a: number, b: number) => `${a}/${b} (${Math.round((100 * a) / b)}%)`;
-console.log(`\nmodelo=${model} casos=${CASOS.length} retries=${retries} tempo=${((Date.now() - t0) / 1000).toFixed(1)}s`);
-console.log(`JSON válido: ${pct(valido, CASOS.length)} | tipo: ${pct(tipoOk, CASOS.length)} | prazo: ${pct(prazoOk, prazoTotal)} | responsável: ${pct(respOk, respTotal)}`);
+console.log(`\nmodel=${model} cases=${CASES.length} retries=${retries} time=${((Date.now() - t0) / 1000).toFixed(1)}s`);
+console.log(`valid JSON: ${pct(valid, CASES.length)} | type: ${pct(typeOk, CASES.length)} | due: ${pct(dueOk, dueTotal)} | owner: ${pct(ownerOk, ownerTotal)}`);
