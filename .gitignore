@@ -1,0 +1,26 @@
+# dependências e build
+node_modules/
+dist/
+coverage/
+
+# segredos e ambiente (NUNCA versionar)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+wallet*.json
+keystore*
+
+# dados locais
+data/
+*.db
+*.db-wal
+*.db-shm
+bugs/logs/
+
+# sistema/editor
+.DS_Store
+.vscode/
+.idea/
+*.log
