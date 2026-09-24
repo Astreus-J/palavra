@@ -9,7 +9,7 @@ Prazo final: **09/10/2026 14:00 UTC (11:00 BRT)**. Meta interna: submeter até 0
 - [ ] Chatbot no ar em **mainnet**, memória exclusivamente no Walrus
 - [ ] **≥10 blobs** escritos, com agent ID como prova
 - [ ] Acessível a usuários reais por ao menos 1 canal (Telegram)
-- [ ] Repositório GitHub **público** com setup reproduzível
+- [x] Repositório GitHub **público** com setup reproduzível: https://github.com/Astreus-J/palavra
 - [ ] Documentação da escolha de LLM (modelo + runtime)
 - [ ] Formulário de submissão Airtable + submissão na DeepSurge
 
