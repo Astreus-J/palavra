@@ -3,7 +3,7 @@
 // Test messages live in eval/fixtures/ (Portuguese and English chat samples).
 import "dotenv/config";
 import { readFileSync } from "node:fs";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 type FactType = "DECISION" | "COMMITMENT" | "AMENDMENT" | "COMPLETION" | "NONE";
 interface Case { author: string; msg: string; type: FactType; owner?: string; due?: string }
@@ -12,12 +12,12 @@ const fixtures = JSON.parse(readFileSync(new URL("./fixtures/extraction-cases.js
 const CASES = fixtures.cases;
 
 const schema = {
-  type: SchemaType.OBJECT,
+  type: "object",
   properties: {
-    type: { type: SchemaType.STRING, format: "enum", enum: ["DECISION", "COMMITMENT", "AMENDMENT", "COMPLETION", "NONE"] },
-    owner: { type: SchemaType.STRING, nullable: true },
-    task: { type: SchemaType.STRING, nullable: true },
-    due: { type: SchemaType.STRING, nullable: true, description: "YYYY-MM-DD or null" },
+    type: { type: "string", enum: ["DECISION", "COMMITMENT", "AMENDMENT", "COMPLETION", "NONE"] },
+    owner: { type: ["string", "null"] },
+    task: { type: ["string", "null"] },
+    due: { type: ["string", "null"], description: "YYYY-MM-DD or null" },
   },
   required: ["type"],
 };
@@ -29,21 +29,24 @@ NONE (small talk, opinion or question). The person writing is the "author"; "I"/
 Convert relative deadlines to YYYY-MM-DD. Do not invent data.`;
 
 const model = process.env.GEMINI_MODEL;
-if (!model || !process.env.GEMINI_API_KEY) throw new Error("Set GEMINI_MODEL and GEMINI_API_KEY");
-const gm = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({
-  model,
-  systemInstruction: system,
-  generationConfig: { responseMimeType: "application/json", responseSchema: schema as never, temperature: 0 },
-});
+const apiKey = process.env.GEMINI_API_KEY;
+if (!model || !apiKey) throw new Error("Set GEMINI_MODEL and GEMINI_API_KEY");
+const MODEL: string = model;
+const ai = new GoogleGenAI({ apiKey });
 
 // 503/429 are transient (high demand / quota): retry with backoff, as the bot will in production.
 let retries = 0;
 async function generate(prompt: string): Promise<string> {
   for (let i = 0; ; i++) {
     try {
-      return (await gm.generateContent(prompt)).response.text();
+      const res = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: { systemInstruction: system, responseMimeType: "application/json", responseJsonSchema: schema, temperature: 0 },
+      });
+      return res.text ?? "";
     } catch (e) {
-      if (i >= 5 || !/\[(503|429)/.test(String(e))) throw e;
+      if (i >= 5 || !/\b(503|429)\b/.test(String(e))) throw e;
       retries++;
       await new Promise((r) => setTimeout(r, 2000 * 2 ** i));
     }

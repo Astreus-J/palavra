@@ -2,7 +2,7 @@
 
 - **Write everything in English**: code, identifiers, comments, log/error messages, tests, docs,
   commit messages and PR text. The hackathon is international. Only Portuguese test data under
-  `fixtures/` is allowed. The user may chat in Portuguese; the repository stays English.
+  `fixtures/` is allowed. The user may chat in Portuguese; the repository stays English. The bot itself always replies in English (D-08).
 - Follow gitflow (see CONTRIBUTING.md): work on `feature/HACKATONSU-<n>-<slug>`, never commit
   to `main` or `develop`. Use Conventional Commits.
 - Never commit `.env` or any secret. Do not print secret values in output.
