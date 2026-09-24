@@ -1,13 +1,17 @@
 #!/usr/bin/env sh
-# Conventional Commits: tipo(escopo opcional): descrição
+# Conventional Commits, in English: type(optional-scope): description
 msg_file="$1"
 first_line=$(head -n1 "$msg_file")
 case "$first_line" in
   Merge\ *|Revert\ *) exit 0 ;;
 esac
 if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)(\([a-z0-9._-]+\))?!?: .{3,}'; then
-  echo "Mensagem de commit inválida. Use Conventional Commits:" >&2
-  echo "  feat(core): adiciona State Resolver" >&2
-  echo "Tipos: feat fix docs chore refactor test perf ci build style" >&2
+  echo "Invalid commit message. Use Conventional Commits:" >&2
+  echo "  feat(core): add State Resolver" >&2
+  echo "Types: feat fix docs chore refactor test perf ci build style" >&2
+  exit 1
+fi
+if printf '%s' "$(cat "$msg_file")" | grep -Eq '[áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]'; then
+  echo "Commit messages must be in English (international hackathon)." >&2
   exit 1
 fi

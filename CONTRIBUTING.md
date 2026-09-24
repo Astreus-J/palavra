@@ -1,55 +1,64 @@
-# Contribuindo — Gitflow
+# Contributing
 
-Usamos **gitflow** (git-flow AVH). Não commite direto em `main` nem em `develop`.
+## Language policy
+**Everything in this repository is written in English**: code, identifiers, comments, log and
+error messages, test names, docs, `.env.example`, git hook messages, commit messages and pull
+requests. The hackathon is international and the repository is public.
 
-## Branches
-| Branch | Origem | Destino | Uso |
+- Exception: Portuguese chat samples used as test data, kept under a `fixtures/` directory.
+- The bot answers each user in the user's own language, but source strings and prompts are English.
+- Team chat and the internal Plane board may use Portuguese.
+- The `pre-commit` and `commit-msg` hooks reject accented Portuguese text outside `fixtures/`.
+
+## Gitflow
+We use **gitflow** (git-flow AVH). Never commit directly to `main` or `develop`.
+
+| Branch | From | Into | Purpose |
 |---|---|---|---|
-| `main` | — | — | Sempre estável; cada versão publicada tem tag `vX.Y.Z` |
-| `develop` | `main` | — | Integração contínua do que está pronto |
-| `feature/<ID>-<slug>` | `develop` | `develop` | Uma tarefa do Plane |
-| `release/<X.Y.Z>` | `develop` | `main` + `develop` | Preparar uma versão (ex.: submissão) |
-| `hotfix/<slug>` | `main` | `main` + `develop` | Correção urgente em produção |
+| `main` | — | — | Always stable; every published version is tagged `vX.Y.Z` |
+| `develop` | `main` | — | Integration of finished work |
+| `feature/<ID>-<slug>` | `develop` | `develop` | One Plane task |
+| `release/<X.Y.Z>` | `develop` | `main` + `develop` | Prepare a version (e.g. the submission) |
+| `hotfix/<slug>` | `main` | `main` + `develop` | Urgent fix in production |
 
-`<ID>` é o número da tarefa no Plane (projeto HackatonSui), por exemplo
-`feature/HACKATONSU-16-state-resolver`.
+`<ID>` is the task number on the Plane board, e.g. `feature/HACKATONSU-16-state-resolver`.
 
-## Fluxo diário
+### Daily flow
 ```bash
 git checkout develop && git pull
 git flow feature start HACKATONSU-16-state-resolver
 # ... commits ...
-git flow feature finish HACKATONSU-16-state-resolver    # merge --no-ff em develop
+git flow feature finish HACKATONSU-16-state-resolver    # merges into develop
 ```
-Com repositório remoto, prefira abrir um Pull Request de `feature/*` para `develop`
-(use `git flow feature publish`) e só então finalizar.
+With a remote, prefer opening a Pull Request from `feature/*` into `develop`
+(`git flow feature publish`) and finishing afterwards.
 
-## Release
+### Release
 ```bash
-git flow release start 0.1.0
-# ajustes finais (versão no package.json, README, CHANGELOG)
-git flow release finish 0.1.0     # tag v0.1.0, merge em main e develop
+git flow release start 1.0.0
+# final touches (version in package.json, README, CHANGELOG)
+git flow release finish 1.0.0     # tags v1.0.0, merges into main and develop
 ```
-Para a submissão do hackathon: `release/1.0.0` até 08/10, tag `v1.0.0`.
+For the hackathon submission: `release/1.0.0` by Oct 8, tag `v1.0.0`.
 
 ## Commits
-[Conventional Commits](https://www.conventionalcommits.org/): `tipo(escopo): descrição`.
-Tipos: `feat fix docs chore refactor test perf ci build style`. Exemplo:
-`feat(core): adiciona State Resolver`. Referencie a tarefa no corpo:
-`Refs HACKATONSU-16`.
+[Conventional Commits](https://www.conventionalcommits.org/): `type(scope): description`.
+Types: `feat fix docs chore refactor test perf ci build style`.
+Example: `feat(core): add State Resolver`. Reference the task in the body: `Refs HACKATONSU-16`.
 
-## Hooks (ative uma vez por clone)
+## Hooks (enable once per clone)
 ```bash
 npm run setup:hooks
 ```
-- `commit-msg`: valida Conventional Commits.
-- `pre-commit`: bloqueia `.env` e padrões de chave (Sui, Gemini, Telegram, Plane).
+- `commit-msg`: validates Conventional Commits and English.
+- `pre-commit`: blocks `.env`, key patterns (Sui, Gemini, Telegram, Plane) and non-English text.
 
-## Segredos
-Nunca versione `.env`, chaves, seeds ou tokens. Use `.env.example` para documentar variáveis.
-Se um segredo vazar, considere-o comprometido e rotacione.
+## Secrets
+Never commit `.env`, keys, seeds or tokens. Document variables in `.env.example`.
+If a secret leaks, treat it as compromised and rotate it.
 
-## Antes de finalizar uma feature
-- `npm run typecheck` e `npm test` passam.
-- Critérios de aceite da tarefa no Plane atendidos.
-- Sem segredos nem dados pessoais no diff.
+## Before finishing a feature
+- `npm run typecheck` and `npm test` pass.
+- The acceptance criteria of the Plane task are met.
+- No secrets or personal data in the diff.
+- Post a completion report as a comment on the Plane task.

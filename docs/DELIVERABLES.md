@@ -1,56 +1,56 @@
-# Entregáveis completos — Walrus Sessions 8
+# Deliverables — Walrus Sessions 8
 
-Prazo final: **09/10/2026 14:00 UTC (11:00 BRT)**. Meta interna: submeter até 08/10 à noite.
+Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by the night of Oct 8.
 
-## A. Obrigatórios para ser elegível
-- [ ] Cadastro na DeepSurge (nome, descrição, contato, GitHub)
-- [ ] Carteira dedicada às Sessions (endereço compatível com WAL)
-- [ ] Conta Walrus Memory em **mainnet** + delegate key (guardada só no servidor)
-- [ ] Chatbot no ar em **mainnet**, memória exclusivamente no Walrus
-- [ ] **≥10 blobs** escritos, com agent ID como prova
-- [ ] Acessível a usuários reais por ao menos 1 canal (Telegram)
-- [x] Repositório GitHub **público** com setup reproduzível: https://github.com/Astreus-J/palavra
-- [ ] Documentação da escolha de LLM (modelo + runtime)
-- [ ] Formulário de submissão Airtable + submissão na DeepSurge
+## A. Mandatory for eligibility
+- [ ] DeepSurge registration (name, description, contact, GitHub)
+- [ ] Wallet dedicated to the Sessions (WAL-compatible address)
+- [ ] Walrus Memory account on **mainnet** + delegate key (kept server-side)
+- [ ] Chatbot live on **mainnet**, memory stored exclusively on Walrus
+- [ ] **≥10 blobs** written, with the agent ID as proof
+- [ ] Reachable by real users through at least one channel
+- [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/palavra
+- [ ] LLM choice documented (model + runtime)
+- [ ] Airtable submission form + DeepSurge submission
 
-## B. Por critério de julgamento
-1. **Memória genuína:** eval de 3 braços (sem recall / só recall / recall + resolver)
-2. **Uso real:** ≥3 pessoas em grupo real por vários dias; transcrições, prints, vídeo de demo, ledger de blobs com links do Walruscan
-3. **Build/reprodutibilidade:** README com setup em ≤10 min, `.env.example`, `npm run eval` com `MemWalMock`, docs de arquitetura, CI simples
-4. **Artigo:** Medium ou Inkray, em inglês, com antes/depois medido
+## B. Per judging criterion
+1. **Genuine memory:** 3-arm eval (no recall / recall only / recall + resolver)
+2. **Real usage:** ≥3 people in a real group for several days; transcripts, screenshots, demo video, blob ledger with Walruscan links
+3. **Build/reproducibility:** README with setup in ≤10 minutes, `.env.example`, `npm run eval` with `MemWalMock`, architecture docs, CI
+4. **Article:** Medium or Inkray, in English, with a measured before/after
 
-## C. Por trilha
-- **Best Chatbot:** tudo de A e B
-- **Beyond the Big Two:** Gemini como único LLM; seção "modelo e runtime" + "atritos de integração" no artigo e no README
-- **Best Article:** publicar cedo (até 07/10) para dar tempo de corrigir
-- **Promo Prize:** postar em espaço de terceiros (fóruns dev BR, Dev.to, Reddit fora de r/sui e r/walrus, newsletters, Discords não afiliados). **Não** conta X nem canais Walrus/Sui. Link entra no formulário
-- **Bug Bounty:** ≥3 issues de qualidade no MemWal, abertas durante o evento (até 09/10), cada uma com reprodução, esperado vs. obtido, ambiente (modelo, runtime, SO, versão do SDK)
+## C. Per track
+- **Best Chatbot:** everything in A and B
+- **Beyond the Big Two:** Gemini as the only LLM; "model and runtime" + "integration friction" sections in the article and README
+- **Best Article:** publish early (by Oct 7) to leave time for fixes
+- **Promo Prize:** post in third-party spaces (Brazilian dev forums, Dev.to, Reddit outside r/sui and r/walrus, newsletters, unaffiliated Discords). X and Walrus/Sui channels do **not** count. The link goes into the form
+- **Bug Bounty:** ≥3 quality issues on MemWal, opened during the event (by Oct 9), each with reproduction, expected vs. actual, environment (model, runtime, OS, SDK version)
 
-## D. Pós-submissão obrigatório
-- [ ] Formulário de feedback do Walrus Memory (≥1 bug/atrito e ≥1 ideia)
-- [ ] Entrar no Discord da Walrus
-- [ ] Compartilhar o artigo no X com @WalrusProtocol e #WalrusMemory
-- [ ] 16/10: resultado. Se ganhar, confirmar por e-mail e enviar carteira em até 21 dias
+## D. Post-submission (required)
+- [ ] Walrus Memory feedback form (≥1 bug/friction and ≥1 idea)
+- [ ] Join the Walrus Discord
+- [ ] Share the article on X with @WalrusProtocol and #WalrusMemory
+- [ ] Oct 16: results. If we win, confirm by email and send the wallet within 21 days
 
-## E. Entregáveis do produto (P0 da proposta)
-- [ ] Registro de decisão/compromisso (`/palavra`, menção)
-- [ ] Alteração e conclusão com supersessão + confirmação por botão
-- [ ] State Resolver (código puro) + ledger local reconstruível do Walrus
-- [ ] `/pendencias` + lembretes determinísticos
-- [ ] `/historico` com cadeia de mudanças e recibos Walruscan
-- [ ] Pergunta livre via recall, citando blobs
-- [ ] Recibo em duas fases (⏳ → 🔗)
-- [ ] Teste de recuperação: apagar SQLite, `restore`, estado volta
-- [ ] `npm run eval` + relatório em mainnet
-- [ ] P1: `/decisoes` com chave de tópico explícita
+## E. Product deliverables (P0 of the design)
+- [ ] Record a decision/commitment (`/palavra`, mention)
+- [ ] Amendment and completion with supersession + button/reply confirmation
+- [ ] State Resolver (pure code) + local ledger rebuildable from Walrus
+- [ ] `/pending` + deterministic reminders
+- [ ] `/history` with the change chain and Walruscan receipts
+- [ ] Free-form question answered through recall, citing blobs
+- [ ] Two-phase receipt (⏳ → 🔗)
+- [ ] Recovery test: delete SQLite, `restore`, state comes back
+- [ ] `npm run eval` + report on mainnet
+- [ ] P1: `/decisions` with an explicit topic key
 
-## F. Cronograma (24/09 → 09/10)
-| Fase | Datas | Foco |
+## F. Schedule (Sep 24 → Oct 9)
+| Phase | Dates | Focus |
 |---|---|---|
-| F0 | 24–25/09 | Docs, Plane, contas, carteira, mainnet, DeepSurge |
-| F1 | 25–28/09 | Núcleo: modelo de fato, ledger, resolver, outbox, MemWal wrapper + Mock |
-| F2 | 28/09–01/10 | Telegram, comandos, confirmação, recibos, pendências, lembretes |
-| F3 | 01–03/10 | Eval 3 braços; teste de restore; deploy estável |
-| F4 | 02–07/10 | Uso real em grupo; coleta de evidências; bugs/issues; artigo; promo |
-| F5 | 07–08/10 | README final, vídeo, ledger de blobs, submissão |
-| Buffer | 09/10 até 14:00 UTC | Só correções |
+| F0 | Sep 24–25 | Docs, board, accounts, wallet, mainnet, DeepSurge |
+| F1 | Sep 25–28 | Core: fact model, ledger, resolver, outbox, MemWal wrapper + Mock |
+| F2 | Sep 28–Oct 1 | Channel, commands, confirmation, receipts, pending, reminders |
+| F3 | Oct 1–3 | 3-arm eval; restore test; stable deploy |
+| F4 | Oct 2–7 | Real usage in a group; evidence; bugs/issues; article; promo |
+| F5 | Oct 7–8 | Final README, video, blob ledger, submission |
+| Buffer | until Oct 9 14:00 UTC | Fixes only |

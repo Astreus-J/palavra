@@ -1,7 +1,7 @@
 {
   "name": "palavra",
   "version": "0.1.0",
-  "description": "Palavra: memória coletiva e livro-razão de compromissos para grupos, sobre Walrus Memory. Walrus Sessions 8.",
+  "description": "Palavra: collective memory and a commitments ledger for group chats, built on Walrus Memory. Walrus Sessions 8.",
   "type": "module",
   "license": "MIT",
   "private": false,
