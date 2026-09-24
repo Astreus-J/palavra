@@ -19,7 +19,7 @@ Built by ParaDevs for **Walrus Sessions 8: Chatbots That Remember**
 - A local SQLite ledger is a **cache that can be rebuilt from Walrus**, never the only source.
 - LLM: Gemini (the "Beyond the Big Two" track), used only to interpret natural language.
 
-Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/HACKATHON.md](docs/HACKATHON.md),
+Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/FACT-MODEL.md](docs/FACT-MODEL.md), [docs/HACKATHON.md](docs/HACKATHON.md),
 [docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Requirements
