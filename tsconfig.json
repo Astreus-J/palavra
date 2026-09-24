@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "eval/**/*"],
+  "include": ["src/**/*", "eval/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }
