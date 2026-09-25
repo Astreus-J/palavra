@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import type { GeminiClient, GenerateRequest } from "./gemini.js";
 import { isTransientError } from "./gemini.js";
 import {
-  buildSystemPrompt, chooseCandidate, describeToday, ExtractionError, extractFact, parseChoice, parseExtraction, EXTRACTION_SCHEMA, type Candidate,
+  buildSystemPrompt, calendarTable, chooseCandidate, describeToday, ExtractionError, extractFact, parseChoice, parseExtraction, EXTRACTION_SCHEMA, type Candidate,
 } from "./extraction.js";
 
 const ok = (over: object = {}) => JSON.stringify({ type: "COMMITMENT", owner: "Maria", task: "send the budget", due: "2026-09-25", ...over });
@@ -32,7 +32,25 @@ test("the prompt states today with its weekday and requires YYYY-MM-DD, never a 
   assert.match(prompt, /YYYY-MM-DD/);
   assert.match(prompt, /Never include a time of day/);
   assert.match(prompt, /DD\/MM/, "the numeric date order rule (D5) is stated");
-  assert.match(prompt, /FOLLOWING calendar week/, "the next-week rule (D3) is stated");
+  assert.match(prompt, /next week/, "the next-week rule (D3) is stated");
+});
+
+test("the prompt carries a calendar of the next 14 days so the model picks a line instead of counting", () => {
+  const cal = calendarTable("2026-09-25").split("\n"); // a Friday
+  assert.equal(cal.length, 14);
+  assert.equal(cal[0], "Friday 2026-09-25: today, this week");
+  assert.equal(cal[1], "Saturday 2026-09-26: tomorrow, this week");
+  assert.equal(cal[2], "Sunday 2026-09-27: this week");
+  assert.equal(cal[3], "Monday 2026-09-28: next week", "weeks run Monday to Sunday");
+  assert.equal(cal[7], "Friday 2026-10-02: next week", "'next Friday' is a different line from today");
+  assert.equal(cal[10], "Monday 2026-10-05: in 2 weeks");
+  assert.equal(cal[13], "Thursday 2026-10-08: in 2 weeks");
+  assert.equal(calendarTable("2026-12-30").split("\n")[3], "Saturday 2027-01-02: this week", "crosses the year boundary");
+  assert.equal(calendarTable("2026-09-21").split("\n")[0], "Monday 2026-09-21: today, this week", "a Monday starts its own week");
+  const prompt = buildSystemPrompt("2026-09-25");
+  assert.match(prompt, /Friday 2026-09-25: today, this week\nSaturday 2026-09-26: tomorrow, this week/);
+  assert.match(prompt, /said on a Friday, "by Friday" is today's date/, "rule D2 is explicit");
+  assert.match(prompt, /whose note says "next week"/, "rule D3 points at the calendar");
 });
 
 test("the schema constrains `due` to a date pattern", () => {

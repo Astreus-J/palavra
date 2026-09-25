@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FACT_TYPES, FactError, looksLikeFact, newFactId, parseFact, serializeFact, isValidIsoDate, type Fact } from "./fact.js";
 
-const base = { author: "tg:123456", owner: null, due: null, topic: null, at: null, supersedes: null } as const;
+const base = { author: "tg:123456", owner: null, due: null, topic: null, at: null, task: null, supersedes: null } as const;
 
 const commitment: Fact = {
   ...base, id: "c_7f3a9b21", type: "COMMITMENT", owner: "Maria", due: "2026-09-26",
@@ -18,7 +18,7 @@ const completion: Fact = { ...base, id: "k_00000003", type: "COMPLETION", supers
 test("serializes to the documented format", () => {
   assert.equal(
     serializeFact(commitment),
-    "[COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26 topic=- at=-\n" +
+    "[COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26 topic=- at=- task=-\n" +
       "Maria committed to sending the budget by Friday, 2026-09-26.",
   );
 });
@@ -39,11 +39,19 @@ test("round-trip keeps special characters, non-ASCII letters and the literal '-'
 test("at round-trips as an ISO instant with milliseconds and rejects anything else", () => {
   const stamped: Fact = { ...commitment, at: "2026-09-25T10:00:00.123Z" };
   const text = serializeFact(stamped);
-  assert.match(text, / at=2026-09-25T10%3A00%3A00\.123Z\n/);
+  assert.match(text, / at=2026-09-25T10%3A00%3A00\.123Z[ \n]/);
   assert.deepEqual(parseFact(text), stamped);
   for (const bad of ["2026-09-25", "2026-09-25T10:00:00Z", "2026-13-01T00:00:00.000Z", "yesterday"]) {
     assert.throws(() => serializeFact({ ...commitment, at: bad }), /invalid at instant/, bad);
   }
+});
+
+test("task round-trips, is optional, and is limited to 120 characters", () => {
+  const titled: Fact = { ...commitment, task: "send the budget (v2) = 100%" };
+  assert.deepEqual(parseFact(serializeFact(titled)), titled);
+  assert.equal(parseFact("[DECISION v1] id=d_00000001 supersedes=- author=tg%3A1\nWe use Postgres.").task, null);
+  assert.throws(() => serializeFact({ ...commitment, task: "x".repeat(121) }), /task must have/);
+  assert.throws(() => serializeFact({ ...commitment, task: "   " }), /task must have/);
 });
 
 test("facts written before `at` existed still parse (at is optional in the header)", () => {

@@ -18,7 +18,7 @@ export function dateFromToday(now: Date, timeZone: string, days: number): string
 export function buildScenario(now: Date, timeZone: string): Fact[] {
   const at = (minutesAgo: number) => new Date(now.getTime() - minutesAgo * 60_000).toISOString();
   const due = (days: number) => dateFromToday(now, timeZone, days);
-  const base = { author: "tg:restore-test", owner: null, due: null, topic: null, supersedes: null } as const;
+  const base = { author: "tg:restore-test", owner: null, due: null, topic: null, task: null, supersedes: null } as const;
 
   const budget = newFactId("COMMITMENT");
   const budgetV2 = newFactId("AMENDMENT");
