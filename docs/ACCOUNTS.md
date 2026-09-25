@@ -43,6 +43,10 @@ Verify on chain: query the account object with any Sui GraphQL/RPC endpoint, or 
 
 | Item | Value |
 |---|---|
-| Address | _pending: to be created and added here (public address only)_ |
-| Purpose | dedicated wallet for the Sessions submission and the prize (WAL-compatible) |
-| Seed backup | held by two team members, outside Git, Plane and chat |
+| Address (Sui mainnet) | `0x982907ba2719cfcfcb68cbd6996ce25b03ab9264d66c631e31d33165c52d6f91` |
+| Wallet | Slush, created only for the Sessions (not a personal wallet) |
+| Purpose | dedicated wallet for the Sessions submission and the prize (WAL-compatible); also the owner of the new Walrus Memory account |
+| Seed backup | held by two team members, outside Git, Plane and chat (**to be confirmed**) |
+| Receive test | **pending** (balance on 2026-09-25: 0 SUI, 0 WAL) |
+
+The address is public on chain and is the one to give to DeepSurge and the submission form.
