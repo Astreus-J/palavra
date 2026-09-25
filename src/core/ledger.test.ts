@@ -109,6 +109,20 @@ test("failed rows are excluded from entries by default and can be requeued", () 
   assert.equal(back.attempts, 0);
 });
 
+test("requeueFact puts only that failed fact back in the queue", () => {
+  const ledger = Ledger.open(":memory:");
+  const a = ledger.addFact("g1", fact(), T0).row;
+  const b = ledger.addFact("g1", fact({ id: "c_00000002", text: "Other." }), T0).row;
+  ledger.markFailed(a.seq, "boom", at(1));
+  ledger.markFailed(b.seq, "boom", at(1));
+  assert.equal(ledger.requeueFact("g1", "c_00000001", at(2)), true);
+  assert.equal(ledger.getRow("g1", "c_00000001")!.status, "pending");
+  assert.equal(ledger.getRow("g1", "c_00000001")!.attempts, 0);
+  assert.equal(ledger.getRow("g1", "c_00000002")!.status, "failed", "the other one is untouched");
+  assert.equal(ledger.requeueFact("g1", "c_00000001", at(3)), false, "no longer failed");
+  assert.equal(ledger.requeueFact("g2", "c_00000002", at(3)), false, "another group");
+});
+
 test("entries feed the resolver: parsed facts, pending included, ordered by insertion", () => {
   const ledger = Ledger.open(":memory:");
   ledger.addFact("g1", fact(), T0);

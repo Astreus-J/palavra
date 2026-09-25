@@ -190,6 +190,19 @@ test("concurrent flushes share one run", async () => {
   assert.equal(store.writes.length, 1);
 });
 
+test("a fact added while a flush is running is written by that same flush", async () => {
+  const { store, ledger, outbox } = setup();
+  ledger.addFact("g1", fact(), T0);
+  const first = outbox.flush();
+  ledger.addFact("g1", fact({ id: "c_00000002", text: "Pedro will ship it.", owner: "Pedro" }), T0);
+  const second = outbox.flush(); // arrives mid-run
+  const report = await first;
+  await second;
+  assert.equal(store.stored.length, 2, "both facts reached Walrus without waiting for another timer tick");
+  assert.equal(report.written, 2);
+  assert.equal(ledger.counts().done, 2);
+});
+
 test("groups are written to their own namespace", async () => {
   const { store, ledger, outbox } = setup();
   ledger.addFact("g1", fact(), T0);

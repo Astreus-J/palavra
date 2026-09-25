@@ -61,12 +61,13 @@ npm run dev
 | `npm run typecheck` | type check |
 | `npm test` | tests (node:test) |
 | `npm run eval` | 3-arm eval (in progress) |
+| `npm run receipt-demo` | live demo of the two-phase receipt in a chat (`-- --chat <id> --real` for mainnet) |
 | `npm run restore-test` | delete the SQLite ledger, rebuild it from Walrus and compare the state (`-- --real` for mainnet) |
 | `npm run build` / `start` | compile and run `dist/` |
 
 ## Layout
 ```
-src/bot/        Telegram: buttons, messages (commands: in progress)
+src/bot/        Telegram: commands, buttons, messages, receipts
 src/llm/        Gemini client and fact extraction
 src/core/       State Resolver, ledger, outbox, proposals
 src/memory/     MemWal wrapper + MemWalMock

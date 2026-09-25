@@ -3,6 +3,8 @@ import type { Fact } from "../core/fact.js";
 import type { ChatUser } from "../core/owner.js";
 import type { ConfirmOutcome, Proposal, ProposalService } from "../core/proposals.js";
 import { callbackData, parseCallbackData, renderProposal, texts, type Rendered } from "./messages.js";
+import { SAVING_LINE } from "./receipts.js";
+import { escapeHtml } from "./render.js";
 
 // Telegram side of the proposals: draws the inline buttons and applies the presses.
 // The functions take narrow interfaces so they can be tested without a running bot.
@@ -16,13 +18,23 @@ export interface CallbackContext {
   from: { id: number; first_name: string; last_name?: string; username?: string };
   /** Answers the callback query (a small toast). */
   answer(text?: string): Promise<unknown>;
-  /** Replaces the text of the proposal message and removes its buttons. */
-  editMessage(text: string): Promise<unknown>;
+  /** Id of the proposal message (the one with the buttons). */
+  messageId?: number;
+  /** Replaces the text of the proposal message and removes its buttons. `html` is for texts that contain links. */
+  editMessage(text: string, html?: boolean): Promise<unknown>;
+}
+
+/** Where the receipt of a written fact will be shown. */
+export interface ReceiptTarget {
+  chatId: string;
+  messageId: number | undefined;
+  /** The confirmation text (HTML, escaped) that the receipt line is appended to. */
+  baseHtml: string;
 }
 
 export interface ProposalHooks {
   /** Called after a fact entered the ledger: the place to flush the outbox and show the receipt. */
-  onWritten?(fact: Fact, proposal: Proposal): void | Promise<void>;
+  onWritten?(fact: Fact, proposal: Proposal, target: ReceiptTarget): void | Promise<void>;
   onError?(error: unknown): void;
 }
 
@@ -53,8 +65,8 @@ export async function sendProposal(api: Pick<Api, "sendMessage">, chatId: number
   });
 }
 
-function summarize(o: Extract<ConfirmOutcome, { status: "written" }>): string {
-  return `${texts.written}\n${o.fact.text}`;
+function confirmationHtml(o: Extract<ConfirmOutcome, { status: "written" }>): string {
+  return `${escapeHtml(texts.written)}\n${escapeHtml(o.fact.text)}`;
 }
 
 /** Applies one button press. Nothing is written unless the presser is allowed and the proposal is still valid. */
@@ -70,8 +82,9 @@ export async function handleProposalCallback(ctx: CallbackContext, service: Prop
     switch (outcome.status) {
       case "written":
         await ctx.answer(texts.written);
-        await ctx.editMessage(summarize(outcome));
-        await hooks.onWritten?.(outcome.fact, outcome.proposal);
+        // Phase one of the receipt: the record exists, the write to Walrus is under way.
+        await ctx.editMessage(`${confirmationHtml(outcome)}\n${SAVING_LINE}`, true);
+        await hooks.onWritten?.(outcome.fact, outcome.proposal, { chatId: String(ctx.chatId), messageId: ctx.messageId, baseHtml: confirmationHtml(outcome) });
         return;
       case "cancelled":
         await ctx.answer();

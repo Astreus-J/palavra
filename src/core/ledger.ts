@@ -196,6 +196,14 @@ export class Ledger {
       .run(error, now.toISOString(), seq);
   }
 
+  /** Puts one failed fact back in the queue (the "Try again" button). Returns false when it was not failed. */
+  requeueFact(groupId: string, factId: string, now: Date): boolean {
+    const r = this.db
+      .prepare(`UPDATE facts SET status = 'pending', attempts = 0, next_attempt_at = NULL, updated_at = ? WHERE group_id = ? AND fact_id = ? AND status = 'failed'`)
+      .run(now.toISOString(), groupId, factId);
+    return r.changes > 0;
+  }
+
   /** Puts failed rows back in the queue with a fresh attempt counter. Returns how many were requeued. */
   requeueFailed(now: Date, groupId?: string): number {
     const stmt = groupId === undefined

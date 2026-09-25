@@ -3,7 +3,9 @@ import type { Fact } from "../core/fact.js";
 import type { Proposal } from "../core/proposals.js";
 import { handleHistoryPick, handleIncoming, type Incoming, type MessageEntity, type Reply, type RouterDeps } from "./commands.js";
 import { parseHistoryCallback } from "./messages.js";
-import { handleProposalCallback, sendProposal, telegramAdminLookup } from "./proposals-bot.js";
+import { parseRetryCallback, retryFailedFact, type ReceiptUpdater } from "./receipts.js";
+import type { Ledger } from "../core/ledger.js";
+import { handleProposalCallback, sendProposal, telegramAdminLookup, type ReceiptTarget } from "./proposals-bot.js";
 
 // Glue between grammy and the framework-independent router. Kept thin on purpose.
 
@@ -29,8 +31,10 @@ export function toIncoming(msg: TelegramTextMessage, isAdmin: boolean): Incoming
 
 export interface HandlerDeps {
   router: RouterDeps;
-  /** Called after a fact entered the ledger: flush the outbox so it reaches Walrus. */
-  onWritten?(fact: Fact, proposal: Proposal): void | Promise<void>;
+  /** Called after a fact entered the ledger: track its receipt and flush the outbox so it reaches Walrus. */
+  onWritten?(fact: Fact, proposal: Proposal, target: ReceiptTarget): void | Promise<void>;
+  /** For the 🔄 Try again button of a receipt. */
+  retry?: { ledger: Ledger; updater: ReceiptUpdater; flush(): void | Promise<void> };
   onError?(error: unknown, context: string): void;
   /** One call per message the bot acted on. Never includes the message text (privacy). */
   onHandled?(info: { chatId: string; userId: string; kind: string; replies: string[] }): void;
@@ -97,13 +101,27 @@ export function registerHandlers(bot: Bot, deps: HandlerDeps): void {
       }
       return;
     }
+    // 🔄 Try again on a receipt whose write failed.
+    const retryFactId = parseRetryCallback(ctx.callbackQuery.data);
+    if (retryFactId !== null && deps.retry) {
+      try {
+        const outcome = await retryFailedFact({ ledger: deps.retry.ledger, updater: deps.retry.updater, groupId: String(chatId), factId: retryFactId, now: new Date() });
+        await ctx.answerCallbackQuery({ text: outcome === "requeued" ? "Trying again…" : "Nothing to retry." });
+        if (outcome === "requeued") void deps.retry.flush();
+      } catch (error) {
+        onError(error, "retry");
+      }
+      return;
+    }
     await handleProposalCallback(
       {
         data: ctx.callbackQuery.data,
         chatId,
         from: ctx.from,
+        ...(ctx.callbackQuery.message ? { messageId: ctx.callbackQuery.message.message_id } : {}),
         answer: (t) => ctx.answerCallbackQuery(t === undefined ? {} : { text: t }),
-        editMessage: (t) => ctx.editMessageText(t, { reply_markup: { inline_keyboard: [] } }),
+        editMessage: (t, html) =>
+          ctx.editMessageText(t, { reply_markup: { inline_keyboard: [] }, link_preview_options: { is_disabled: true }, ...(html ? { parse_mode: "HTML" as const } : {}) }),
       },
       deps.router.service,
       isAdmin,

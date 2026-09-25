@@ -33,8 +33,8 @@ function setup() {
 
 /** A fake callback context that records what the bot answers and edits. */
 function fakeCtx(data: string, from: CallbackContext["from"]) {
-  const log = { answers: [] as (string | undefined)[], edits: [] as string[] };
-  const ctx: CallbackContext = { data, chatId: G, from, answer: async (t) => { log.answers.push(t); }, editMessage: async (t) => { log.edits.push(t); } };
+  const log = { answers: [] as (string | undefined)[], edits: [] as string[], html: [] as (boolean | undefined)[] };
+  const ctx: CallbackContext = { data, chatId: G, messageId: 42, from, answer: async (t) => { log.answers.push(t); }, editMessage: async (t, html) => { log.edits.push(t); log.html.push(html); } };
   return { ctx, log };
 }
 const notAdmin: AdminLookup = async () => false;
@@ -44,11 +44,14 @@ test("a press by the author writes the fact, edits the message and calls the hoo
   const s = setup();
   const p = await s.propose();
   const written: Fact[] = [];
+  const targets: unknown[] = [];
   const { ctx, log } = fakeCtx(callbackData(p.id, "yes"), MARIA);
-  await handleProposalCallback(ctx, s.service, notAdmin, { onWritten: (f) => { written.push(f); } });
+  await handleProposalCallback(ctx, s.service, notAdmin, { onWritten: (f, _p, target) => { written.push(f); targets.push(target); } });
   assert.deepEqual(log.answers, [texts.written]);
-  assert.match(log.edits[0]!, /^✅ Recorded\nMaria committed to send the budget\./);
+  assert.match(log.edits[0]!, /^✅ Recorded\nMaria committed to send the budget\.[^\n]*\n⏳ Saving to Walrus…$/, "phase one of the receipt is shown at once");
+  assert.deepEqual(log.html, [true], "the edit is HTML so the receipt link can be added later");
   assert.equal(written.length, 1);
+  assert.deepEqual(targets, [{ chatId: G, messageId: 42, baseHtml: log.edits[0]!.replace("\n⏳ Saving to Walrus…", "") }]);
   assert.equal(s.ledger.entries(G).length, 1);
 });
 
@@ -108,7 +111,7 @@ test("garbage callback data and unknown proposals are ignored safely", async () 
   const s = setup();
   const bad = fakeCtx("hello", MARIA);
   await handleProposalCallback(bad.ctx, s.service, notAdmin);
-  assert.deepEqual(bad.log, { answers: [undefined], edits: [] });
+  assert.deepEqual(bad.log, { answers: [undefined], edits: [], html: [] });
   const unknown = fakeCtx(callbackData("ffffffff", "yes"), MARIA);
   await handleProposalCallback(unknown.ctx, s.service, notAdmin);
   assert.deepEqual(unknown.log.answers, [texts.notFound]);

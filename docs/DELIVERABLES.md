@@ -39,7 +39,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] `/pending` + deterministic reminders (`/pending` done; reminders: task HACKATONSU-22)
 - [x] `/history` with the change chain and Walruscan receipts (pick from a list or search)
 - [ ] Free-form question answered through recall, citing blobs
-- [ ] Two-phase receipt (⏳ → 🔗)
+- [x] Two-phase receipt (⏳ → 🔗) (live proof in docs/evidence)
 - [x] Recovery test: delete SQLite, `restore`, state comes back (`npm run restore-test`; evidence in docs/evidence)
 - [ ] `npm run eval` + report on mainnet
 - [ ] P1: `/decisions` with an explicit topic key
