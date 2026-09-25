@@ -2,7 +2,8 @@ import Database from "better-sqlite3";
 import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { newFactId, type Fact, type FactType } from "./fact.js";
+import { MAX_TASK_LENGTH, newFactId, type Fact, type FactType } from "./fact.js";
+import { shorten, taskOf } from "./labels.js";
 import type { Ledger } from "./ledger.js";
 import { ownerMatchesUser, sameName, type ChatUser } from "./owner.js";
 import { resolveState, todayIn, type ItemState } from "./resolver.js";
@@ -127,11 +128,9 @@ export class ProposalStore {
 
 // ---- helpers ------------------------------------------------------------------------------------
 
-const shorten = (text: string, max = 60) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
-
 /** A one-line description of an item, used as its label in messages and as a candidate for the model. */
 function itemLabel(item: ItemState): string {
-  return shorten(item.history[0]?.fact.text ?? item.current.text);
+  return taskOf(item);
 }
 
 function candidateFor(item: ItemState): Candidate {
@@ -295,15 +294,15 @@ export class ProposalService {
     const confirmedNote = presser.id === proposal.proposer.id ? "" : ` Confirmed by ${presser.name}.`;
     if (action === "other") {
       const owner = proposal.extracted.owner ?? proposal.proposer.name;
-      fact = this.buildFact(proposal, "COMMITMENT", null, owner, proposal.extracted.due, commitmentText(owner, proposal.extracted.task, proposal.extracted.due) + confirmedNote, now);
+      fact = this.buildFact(proposal, "COMMITMENT", null, owner, proposal.extracted.due, commitmentText(owner, proposal.extracted.task, proposal.extracted.due) + confirmedNote, shorten(proposal.extracted.task, MAX_TASK_LENGTH), now);
     } else if (proposal.kind === "record" || proposal.kind === "record-instead") {
-      fact = this.buildFact(proposal, proposal.factType, null, proposal.draft.owner, proposal.draft.due, proposal.draft.text + confirmedNote, now);
+      fact = this.buildFact(proposal, proposal.factType, null, proposal.draft.owner, proposal.draft.due, proposal.draft.text + confirmedNote, shorten(proposal.draft.task, MAX_TASK_LENGTH), now);
     } else {
       // amend / complete: re-read the state, the item may have changed since the proposal was made.
       const item = this.state(proposal.groupId).find((i) => i.rootId === proposal.targetRootId);
       if (!item) return { status: "target-changed", reason: "missing", proposal };
       if (item.status === "completed") return { status: "target-changed", reason: "completed", proposal };
-      fact = this.buildFact(proposal, proposal.factType, item.current.id, proposal.draft.owner, proposal.draft.due, proposal.draft.text + confirmedNote, now);
+      fact = this.buildFact(proposal, proposal.factType, item.current.id, proposal.draft.owner, proposal.draft.due, proposal.draft.text + confirmedNote, null, now);
     }
 
     this.ledger.addFact(proposal.groupId, fact, now);
@@ -312,8 +311,8 @@ export class ProposalService {
     return { status: "written", proposal: confirmed, fact };
   }
 
-  private buildFact(p: Proposal, type: FactType, supersedes: string | null, owner: string | null, due: string | null, text: string, now: Date): Fact {
+  private buildFact(p: Proposal, type: FactType, supersedes: string | null, owner: string | null, due: string | null, text: string, task: string | null, now: Date): Fact {
     // `author` stays the person who wrote the message, even when someone else confirmed it (A4).
-    return { id: newFactId(type), type, supersedes, author: p.proposer.id, owner, due, topic: p.draft.topic, at: now.toISOString(), text: text.trim() };
+    return { id: newFactId(type), type, supersedes, author: p.proposer.id, owner, due, topic: p.draft.topic, at: now.toISOString(), task, text: text.trim() };
   }
 }

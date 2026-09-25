@@ -73,15 +73,26 @@ export const texts = {
   notAllowed: (who: string) => `Only ${who} or an admin can confirm this`,
   written: "✅ Recorded",
   couldNotUnderstand: "Sorry, I couldn't process that message right now. Please try again in a moment.",
+  quotaExhausted: "I've reached my daily limit of AI requests, so I can't read new messages right now. Nothing was lost: please try again later.",
 } as const;
 
-// ---- callback data: "p:<proposal id>:<y|o|n>" (Telegram allows at most 64 bytes) ------------------
+// ---- callback data: "p:<proposal id>:<y|o|n>" and "h:<item id>" (Telegram allows at most 64 bytes) ----
 
 const CODE: Record<ProposalAction, string> = { yes: "y", other: "o", no: "n" };
 const ACTION: Record<string, ProposalAction> = { y: "yes", o: "other", n: "no" };
 
 export function callbackData(proposalId: string, action: ProposalAction): string {
   return `p:${proposalId}:${CODE[action]}`;
+}
+
+/** Tapping an item in the /history list. */
+export function historyCallbackData(rootId: string): string {
+  return `h:${rootId}`;
+}
+
+export function parseHistoryCallback(data: string): string | null {
+  const m = /^h:([dcak]_[0-9a-f]{8})$/.exec(data);
+  return m ? (m[1] as string) : null;
 }
 
 export function parseCallbackData(data: string): { proposalId: string; action: ProposalAction } | null {

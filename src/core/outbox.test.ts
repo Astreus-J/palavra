@@ -39,7 +39,7 @@ class FakeStore implements MemoryStore {
 }
 
 const fact = (over: Partial<Fact> = {}): Fact => ({
-  id: "c_00000001", type: "COMMITMENT", supersedes: null, author: "tg:1", owner: "Maria", due: "2026-09-30", topic: null, at: null,
+  id: "c_00000001", type: "COMMITMENT", supersedes: null, author: "tg:1", owner: "Maria", due: "2026-09-30", topic: null, at: null, task: null,
   text: "Maria will send the budget.", ...over,
 });
 

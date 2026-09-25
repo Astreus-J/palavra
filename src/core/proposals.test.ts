@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { GeminiClient, GenerateRequest } from "../llm/gemini.js";
 import { ExtractionError } from "../llm/extraction.js";
+import { FakeLlm } from "../test-support/fake-llm.js";
 import { renderProposal } from "../bot/messages.js";
 import type { Fact } from "./fact.js";
 import { Ledger } from "./ledger.js";
@@ -23,33 +23,6 @@ const ana: ChatUser = { id: "tg:4", name: "Ana", isAdmin: true };
 
 const BUDGET = "c_00000b01", INVOICE = "c_00000b02", BACKEND = "c_00000ba1", LAUNCH = "d_00000d01", BUDGET_V2 = "a_00000a01", BUDGET_DONE = "k_00000f01";
 
-/** Fake Gemini: extraction and candidate-choice answers come from queues, in order. */
-class FakeLlm {
-  private extractions: object[] = [];
-  private choices: string[] = [];
-  requests: GenerateRequest[] = [];
-  failWith: Error | null = null;
-  extract(x: { type: string; owner?: string | null; task?: string | null; due?: string | null }) {
-    this.extractions.push({ owner: null, task: null, due: null, ...x });
-    return this;
-  }
-  choose(id: string) {
-    this.choices.push(id);
-    return this;
-  }
-  get chooseCalls() { return this.requests.filter((r) => r.prompt.includes("Candidates:")); }
-  get extractCalls() { return this.requests.filter((r) => !r.prompt.includes("Candidates:")); }
-  client: GeminiClient = {
-    generate: async (request) => {
-      this.requests.push(request);
-      if (this.failWith) throw this.failWith;
-      const next = request.prompt.includes("Candidates:") ? { choice: this.choices.shift() } : this.extractions.shift();
-      if (next === undefined || (next as { choice?: unknown }).choice === undefined && request.prompt.includes("Candidates:")) throw new Error("the test did not script this call");
-      return JSON.stringify(next);
-    },
-  };
-}
-
 function setup(store = ProposalStore.open(":memory:")) {
   const clock = { now: new Date(T0) };
   const ledger = Ledger.open(":memory:");
@@ -62,7 +35,7 @@ function setup(store = ProposalStore.open(":memory:")) {
   });
   const advance = (ms: number) => { clock.now = new Date(clock.now.getTime() + ms); };
   const seed = (f: Partial<Fact> & Pick<Fact, "id" | "type">) =>
-    ledger.addFact(G, { supersedes: null, author: "tg:1", owner: null, due: null, topic: null, at: "2026-09-23T10:00:00.000Z", text: `text of ${f.id}`, ...f }, T0);
+    ledger.addFact(G, { supersedes: null, author: "tg:1", owner: null, due: null, topic: null, task: null, at: "2026-09-23T10:00:00.000Z", text: `text of ${f.id}`, ...f }, T0);
   const state = () => resolveState(ledger.entries(G), { now: clock.now, timeZone: TZ }).items;
   const say = (author: ChatUser, text: string, sentAt = T0) => service.propose({ groupId: G, author, text, sentAt });
   return { service, ledger, llm, clock, advance, seed, state, say, store };
@@ -93,6 +66,7 @@ test("A2: a commitment for someone else keeps author and owner apart; nothing is
   assert.equal(fact.owner, "Pedro");
   assert.equal(fact.due, "2026-09-30");
   assert.equal(fact.supersedes, null);
+  assert.equal(fact.task, "finish the backend", "the fact that opens an item carries its short title");
   assert.equal(s.ledger.entries(G).length, 1);
 });
 
@@ -219,6 +193,7 @@ test("A5: the owner amends directly; only the changed fields are stated and the 
   assert.equal(fact.supersedes, BUDGET);
   assert.equal(fact.due, "2026-09-26");
   assert.equal(fact.owner, null, "the owner did not change");
+  assert.equal(fact.task, null, "only the fact that opens an item carries the title");
   const item = s.state()[0]!;
   assert.equal(item.due, "2026-09-26");
   assert.equal(item.owner, "Maria");

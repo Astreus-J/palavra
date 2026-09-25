@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isValidIsoDate } from "../core/fact.js";
-import { isTransientError, type GeminiClient } from "./gemini.js";
+import { isQuotaExhausted, isTransientError, type GeminiClient } from "./gemini.js";
 
 // Fact extraction: turns one chat message into a structured proposal with Gemini.
 //
@@ -25,6 +25,11 @@ export class ExtractionError extends Error {
     super(message, causes[0] === undefined ? undefined : { cause: causes[0] });
     this.name = "ExtractionError";
   }
+
+  /** True when every attempt failed because the AI quota is used up (so the user can be told why). */
+  get quotaExhausted(): boolean {
+    return this.causes.length > 0 && this.causes.every(isQuotaExhausted);
+  }
 }
 
 /** JSON schema sent to Gemini. `due` is constrained to a date pattern, and validated again in code. */
@@ -45,11 +50,33 @@ export function describeToday(today: string): string {
   return `${today} (${weekday})`;
 }
 
+/**
+ * A ready-made calendar of the next 14 days: weekday, date and the week it belongs to
+ * ("Friday 2026-10-02: next week"). Models are unreliable at counting days, so the prompt hands them
+ * the answers and they only pick a line. Weeks run Monday to Sunday.
+ */
+export function calendarTable(today: string, days = 14): string {
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const mondayOf = (ms: number) => ms - ((new Date(ms).getUTCDay() + 6) % 7) * DAY_MS;
+  const start = Date.UTC(y, m - 1, d);
+  const lines: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const ms = start + i * DAY_MS;
+    const weeksAhead = Math.round((mondayOf(ms) - mondayOf(start)) / (7 * DAY_MS));
+    const week = weeksAhead === 0 ? "this week" : weeksAhead === 1 ? "next week" : `in ${weeksAhead} weeks`;
+    const notes = [i === 0 ? "today" : i === 1 ? "tomorrow" : null, week].filter(Boolean).join(", ");
+    const weekday = new Date(ms).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+    lines.push(`${weekday} ${new Date(ms).toISOString().slice(0, 10)}: ${notes}`);
+  }
+  return lines.join("\n");
+}
+
 /** The deadline rules of docs/PRODUCT.md (D1-D9), stated for the model. */
 const DEADLINE_RULES = `Deadline rules (the group timezone is already applied to "today"):
 - "today", "tomorrow", "the day after tomorrow", "in N days", "in N weeks": count from today.
-- A bare weekday ("Friday", "sexta") is the nearest such weekday on or after today; said on that weekday, it is today.
-- "next week" + weekday, "next Friday", "Friday next week": that weekday in the FOLLOWING calendar week (weeks run Monday to Sunday).
+- A bare weekday ("Friday", "sexta") is the FIRST line of the calendar below with that weekday, today included: said on a Friday, "by Friday" is today's date.
+- "next week" + weekday, "next Friday", "Friday next week": the calendar line with that weekday whose note says "next week", never the nearest one.
 - A day of the month alone ("by the 30th", "dia 30") is its next occurrence on or after today; skip months without that day.
 - Numeric dates are DD/MM or DD/MM/YYYY (never MM/DD). A written month ("October 12") is accepted. Without a year, use the current year if the date is today or later, otherwise the next year.
 - "end of the month" is the last day of the current month.
@@ -60,6 +87,9 @@ const DEADLINE_RULES = `Deadline rules (the group timezone is already applied to
 export function buildSystemPrompt(today: string): string {
   return `You extract facts from messages of a work group chat. Messages may be in Portuguese or English.
 Today is ${describeToday(today)}.
+
+Calendar (use it to convert weekdays and relative days to dates):
+${calendarTable(today)}
 
 Types:
 - DECISION: the group decided something.
