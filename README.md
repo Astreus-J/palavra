@@ -23,7 +23,7 @@ Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/FACT-MODEL.md](docs/FACT-MODEL.
 [docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Requirements
-- Node.js ≥ 20 (`nvm use`)
+- Node.js ≥ 22 (`nvm use`); the SQLite driver (`better-sqlite3` 13) requires it
 
 ## Setup
 ```bash
