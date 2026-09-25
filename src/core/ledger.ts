@@ -152,6 +152,11 @@ export class Ledger {
     });
   }
 
+  /** Every row of a group, including failed ones, oldest first. */
+  rows(groupId: string): LedgerRow[] {
+    return (this.db.prepare(`SELECT * FROM facts WHERE group_id = ? ORDER BY seq`).all(groupId) as DbRow[]).map(toRow);
+  }
+
   groups(): string[] {
     return (this.db.prepare(`SELECT DISTINCT group_id FROM facts ORDER BY group_id`).all() as { group_id: string }[]).map((r) => r.group_id);
   }

@@ -15,7 +15,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx scripts/test.ts",
     "eval": "tsx eval/run.ts",
-    "setup:hooks": "git config core.hooksPath .githooks"
+    "setup:hooks": "git config core.hooksPath .githooks",
+    "restore-test": "tsx scripts/restore-test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

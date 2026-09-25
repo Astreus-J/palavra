@@ -40,7 +40,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] `/history` with the change chain and Walruscan receipts
 - [ ] Free-form question answered through recall, citing blobs
 - [ ] Two-phase receipt (⏳ → 🔗)
-- [ ] Recovery test: delete SQLite, `restore`, state comes back
+- [x] Recovery test: delete SQLite, `restore`, state comes back (`npm run restore-test`; evidence in docs/evidence)
 - [ ] `npm run eval` + report on mainnet
 - [ ] P1: `/decisions` with an explicit topic key
 

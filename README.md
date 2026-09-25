@@ -60,6 +60,7 @@ npm run dev
 | `npm run typecheck` | type check |
 | `npm test` | tests (node:test) |
 | `npm run eval` | 3-arm eval (in progress) |
+| `npm run restore-test` | delete the SQLite ledger, rebuild it from Walrus and compare the state (`-- --real` for mainnet) |
 | `npm run build` / `start` | compile and run `dist/` |
 
 ## Layout
