@@ -58,9 +58,12 @@ for the account we submit.
 | Item | Value |
 |---|---|
 | Address (Sui mainnet) | `0x982907ba2719cfcfcb68cbd6996ce25b03ab9264d66c631e31d33165c52d6f91` |
-| Wallet | Slush, created only for the Sessions (not a personal wallet) |
-| Purpose | dedicated wallet for the Sessions submission and the prize (WAL-compatible); owner of the Walrus Memory account above |
-| Seed backup | held by two team members, outside Git, Plane and chat (**to be confirmed**) |
-| Receive test | **pending** (balance on 2026-09-25: 0 SUI, 0 WAL) |
+| Wallet | Slush, created with a Google login (zkLogin); dedicated to the Sessions |
+| Purpose | Sessions submission and prize (WAL-compatible); owner of the Walrus Memory account above |
+| Recovery | through the Google account behind the wallet; **no seed phrase backup** (risk accepted by the project owner: losing access to that Google account means losing the wallet) |
+| Receive test | verified on chain: the address **received 0.01 SUI** (2025-11-30) and later sent 0.01 SUI (2025-12-12); its balance was 0 SUI and 0 WAL on 2026-09-25 |
 
-The address is public on chain and is the one to give to DeepSurge and the submission form.
+On-chain history: the address has activity before the hackathon (first transaction 2025-11-30).
+It is the address to give to DeepSurge and the submission form. Gas for the Walrus Memory
+transactions (account creation, delegate key registration) was sponsored: those transactions
+show no balance change for this address.
