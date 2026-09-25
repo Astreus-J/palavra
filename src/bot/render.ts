@@ -59,21 +59,53 @@ export interface HistoryOptions {
   proofBaseUrl: string;
 }
 
-/** /history <topic>: how each matching item changed, with a proof link per fact. */
+function itemHistory(item: ItemState, o: HistoryOptions): string {
+  const head = `📜 <b>${escapeHtml(taskOf(item))}</b>${item.owner ? ` — ${escapeHtml(item.owner)}` : ""}`;
+  const lines = item.history.map(({ fact }, n) => {
+    const details = [fact.due ? `due ${formatDate(fact.due)}` : null, fact.type === "AMENDMENT" && fact.owner ? `owner → ${escapeHtml(fact.owner)}` : null].filter(Boolean).join(", ");
+    const blob = o.ledger.getRow(o.groupId, fact.id)?.blobId ?? null;
+    const proof = blob ? `<a href="${escapeHtml(`${o.proofBaseUrl}/${blob}`)}">proof</a>` : "⏳ saving";
+    return `${n + 1}. ${fact.at ? dayIn(fact.at, o.timeZone) : "?"} · ${VERB[fact.type]}${details ? `, ${details}` : ""} · ${proof}`;
+  });
+  const status = item.kind === "DECISION" ? (item.due ? `Now: due ${formatDate(item.due)}` : "Now: active") : item.status === "completed" ? "Now: completed ✅" : `Now: ${item.status}${item.due ? `, due ${formatDate(item.due)}` : ""}`;
+  return [head, ...lines, status].join("\n");
+}
+
+/** How one item changed, with a proof link per fact. */
+export function renderItemHistory(item: ItemState, o: HistoryOptions): string {
+  return itemHistory(item, o);
+}
+
+/** /history <topic>: how each matching item changed. Empty string when nothing matches. */
 export function renderHistory(items: readonly ItemState[], query: string, o: HistoryOptions): string {
   const found = items.filter((i) => matches(i, query)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 3);
-  if (found.length === 0) return `I found nothing about "${escapeHtml(shorten(query, 40))}".`;
-  return found
-    .map((item) => {
-      const head = `📜 <b>${escapeHtml(taskOf(item))}</b>${item.owner ? ` — ${escapeHtml(item.owner)}` : ""}`;
-      const lines = item.history.map(({ fact }, n) => {
-        const details = [fact.due ? `due ${formatDate(fact.due)}` : null, fact.type === "AMENDMENT" && fact.owner ? `owner → ${escapeHtml(fact.owner)}` : null].filter(Boolean).join(", ");
-        const blob = o.ledger.getRow(o.groupId, fact.id)?.blobId ?? null;
-        const proof = blob ? `<a href="${escapeHtml(`${o.proofBaseUrl}/${blob}`)}">proof</a>` : "⏳ saving";
-        return `${n + 1}. ${fact.at ? dayIn(fact.at, o.timeZone) : "?"} · ${VERB[fact.type]}${details ? `, ${details}` : ""} · ${proof}`;
-      });
-      const status = item.kind === "DECISION" ? (item.due ? `Now: due ${formatDate(item.due)}` : "Now: active") : item.status === "completed" ? "Now: completed ✅" : `Now: ${item.status}${item.due ? `, due ${formatDate(item.due)}` : ""}`;
-      return [head, ...lines, status].join("\n");
-    })
-    .join("\n\n");
+  return found.map((item) => itemHistory(item, o)).join("\n\n");
+}
+
+const RECENT_LIMIT = 8;
+
+export interface RecentList {
+  text: string;
+  /** One button per item; `data` is the item id. */
+  items: { label: string; rootId: string }[];
+}
+
+function statusIcon(item: ItemState): string {
+  if (item.kind === "DECISION") return "📌";
+  return item.status === "completed" ? "✅" : item.status === "overdue" ? "🔴" : "🟢";
+}
+
+/** The most recently changed items, so nobody has to remember what something was called. */
+export function renderRecent(items: readonly ItemState[], intro: string): RecentList | null {
+  const recent = [...items].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, RECENT_LIMIT);
+  if (recent.length === 0) return null;
+  const lines = recent.map((item, n) => {
+    const who = item.owner ? ` — ${escapeHtml(item.owner)}` : "";
+    return `${n + 1}. ${statusIcon(item)} ${escapeHtml(taskOf(item))}${who}`;
+  });
+  const legend = "🟢 open · 🔴 overdue · ✅ done · 📌 decision";
+  return {
+    text: [intro, ...lines, "", legend, "Tap an item to see how it changed, or type /history followed by a word (a name or part of the task)."].join("\n"),
+    items: recent.map((item, n) => ({ label: `${n + 1}. ${shorten(taskOf(item), 30)}`, rootId: item.rootId })),
+  };
 }

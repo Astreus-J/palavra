@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { GeminiClient, GenerateRequest } from "./gemini.js";
-import { isTransientError } from "./gemini.js";
+import { isDailyQuota, isQuotaExhausted, isTransientError } from "./gemini.js";
 import {
   buildSystemPrompt, calendarTable, chooseCandidate, describeToday, ExtractionError, extractFact, parseChoice, parseExtraction, EXTRACTION_SCHEMA, type Candidate,
 } from "./extraction.js";
@@ -131,6 +131,40 @@ test("when every model fails, ExtractionError carries all the causes", async () 
     (e: unknown) => e instanceof ExtractionError && e.causes.length === 2 && /primary, backup/.test(e.message),
   );
   await assert.rejects(extractFact("x", "Maria", "2026-09-24", { client: scripted([]).client, models: [] }), /no model configured/);
+});
+
+const dailyQuota = () => new Error('{"error":{"code":429,"message":"You exceeded your current quota. Quota exceeded for metric: generate_content_free_tier_requests, limit: 20","status":"RESOURCE_EXHAUSTED","details":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}}');
+
+test("a daily quota is not retried: it goes straight to the fallback model", async () => {
+  const waits: number[] = [];
+  const { client, calls } = scripted([dailyQuota(), ok()]);
+  const r = await extractFact("x", "Maria", "2026-09-24", { client, models: ["primary", "backup"], sleep: noSleep(waits) });
+  assert.deepEqual(waits, [], "no waiting on a quota that resets tomorrow");
+  assert.deepEqual(calls.map((c) => c.model), ["primary", "backup"]);
+  assert.equal(r.usedFallback, true);
+});
+
+test("when every model is out of quota the error says so, so the user can be told", async () => {
+  const { client } = scripted([dailyQuota(), dailyQuota()]);
+  await assert.rejects(
+    extractFact("x", "Maria", "2026-09-24", { client, models: ["primary", "backup"], sleep: noSleep() }),
+    (e: unknown) => e instanceof ExtractionError && e.quotaExhausted === true,
+  );
+  const mixed = scripted([dailyQuota(), "garbage"]);
+  await assert.rejects(
+    extractFact("x", "Maria", "2026-09-24", { client: mixed.client, models: ["primary", "backup"], sleep: noSleep() }),
+    (e: unknown) => e instanceof ExtractionError && e.quotaExhausted === false,
+  );
+});
+
+test("quota helpers: a per-minute limit is retried, a daily one is not", () => {
+  const perMinute = new Error("429 RESOURCE_EXHAUSTED: rate limit, retry in 20s");
+  assert.equal(isQuotaExhausted(perMinute), true);
+  assert.equal(isDailyQuota(perMinute), false);
+  assert.equal(isTransientError(perMinute), true);
+  assert.equal(isDailyQuota(dailyQuota()), true);
+  assert.equal(isTransientError(dailyQuota()), false);
+  assert.equal(isQuotaExhausted(new Error("503 unavailable")), false);
 });
 
 test("isTransientError recognises overload, quota and network errors only", () => {

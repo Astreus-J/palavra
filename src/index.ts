@@ -52,7 +52,15 @@ async function main(): Promise<void> {
   const bot = new Bot(secrets.telegramToken);
   const me = await withStartupRetry("Telegram getMe", () => bot.api.getMe(), log);
   registerHandlers(bot, {
-    router: { service, ledger, timeZone: cfg.DEFAULT_TIMEZONE, botUsername: me.username, proofBaseUrl: cfg.WALRUSCAN_BLOB_URL },
+    router: {
+      service,
+      ledger,
+      timeZone: cfg.DEFAULT_TIMEZONE,
+      botUsername: me.username,
+      proofBaseUrl: cfg.WALRUSCAN_BLOB_URL,
+      onExtractionError: (error) =>
+        log.warn({ error: error.message, causes: error.causes.map((c) => (c instanceof Error ? c.message.slice(0, 160) : String(c).slice(0, 160))) }, "extraction failed"),
+    },
     onWritten: (fact) => {
       log.info({ factId: fact.id, type: fact.type }, "fact recorded");
       void flush();

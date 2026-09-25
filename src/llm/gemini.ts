@@ -14,10 +14,22 @@ export interface GeminiClient {
   generate(request: GenerateRequest): Promise<string>;
 }
 
-/** Errors worth retrying: overloaded (503), quota or rate limit (429), and network failures. */
+const errorText = (error: unknown) => (error instanceof Error ? `${error.name} ${error.message}` : String(error));
+
+/** The quota is used up (HTTP 429 / RESOURCE_EXHAUSTED). */
+export function isQuotaExhausted(error: unknown): boolean {
+  return /\b429\b|RESOURCE_EXHAUSTED/i.test(errorText(error));
+}
+
+/** A daily quota does not come back in seconds, so waiting and retrying is pointless. */
+export function isDailyQuota(error: unknown): boolean {
+  return isQuotaExhausted(error) && /PerDay|per day|daily/i.test(errorText(error));
+}
+
+/** Errors worth retrying on the same model: overloaded (503), a per-minute rate limit (429), network failures. */
 export function isTransientError(error: unknown): boolean {
-  const text = error instanceof Error ? `${error.name} ${error.message}` : String(error);
-  return /\b(503|429|500|502|504)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|ECONNRESET|ETIMEDOUT|fetch failed|network/i.test(text);
+  if (isDailyQuota(error)) return false;
+  return /\b(503|429|500|502|504)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|ECONNRESET|ETIMEDOUT|fetch failed|network/i.test(errorText(error));
 }
 
 export function createGeminiClient(apiKey: string): GeminiClient {

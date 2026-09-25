@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Proposal } from "../core/proposals.js";
-import { callbackData, formatDate, noOpenCommitmentNotice, parseCallbackData, renderProposal, texts } from "./messages.js";
+import { callbackData, formatDate, historyCallbackData, noOpenCommitmentNotice, parseCallbackData, parseHistoryCallback, renderProposal, texts } from "./messages.js";
 
 const base: Proposal = {
   id: "0000000a", groupId: "-1", status: "pending", kind: "record", factType: "COMMITMENT",
@@ -77,6 +77,16 @@ test("callback data round-trips, fits Telegram's 64 bytes and rejects garbage", 
     assert.deepEqual(parseCallbackData(data), { proposalId: "0000000a", action });
   }
   for (const bad of ["", "x", "p:zzzz:y", "p:0000000a:x", "p:0000000a", "q:0000000a:y", "p:0000000A:y"]) assert.equal(parseCallbackData(bad), null, bad);
+});
+
+test("history callback data round-trips and never collides with the proposal buttons", () => {
+  const data = historyCallbackData("c_22393069");
+  assert.equal(data, "h:c_22393069");
+  assert.ok(Buffer.byteLength(data) <= 64);
+  assert.equal(parseHistoryCallback(data), "c_22393069");
+  assert.equal(parseCallbackData(data), null, "a history tap is not a proposal press");
+  assert.equal(parseHistoryCallback(callbackData("0000000a", "yes")), null);
+  for (const bad of ["", "h:", "h:x_22393069", "h:c_2239306", "h:c_22393069x", "H:c_22393069"]) assert.equal(parseHistoryCallback(bad), null, bad);
 });
 
 test("permission texts name who can confirm", () => {

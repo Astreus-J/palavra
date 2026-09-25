@@ -1,7 +1,8 @@
-import type { Bot } from "grammy";
+import { InlineKeyboard, type Api, type Bot } from "grammy";
 import type { Fact } from "../core/fact.js";
 import type { Proposal } from "../core/proposals.js";
-import { handleIncoming, type Incoming, type MessageEntity, type Reply, type RouterDeps } from "./commands.js";
+import { handleHistoryPick, handleIncoming, type Incoming, type MessageEntity, type Reply, type RouterDeps } from "./commands.js";
+import { parseHistoryCallback } from "./messages.js";
 import { handleProposalCallback, sendProposal, telegramAdminLookup } from "./proposals-bot.js";
 
 // Glue between grammy and the framework-independent router. Kept thin on purpose.
@@ -35,6 +36,25 @@ export interface HandlerDeps {
   onHandled?(info: { chatId: string; userId: string; kind: string; replies: string[] }): void;
 }
 
+/** Sends one reply, with its inline buttons, optionally as a reply to a message. */
+export async function sendReply(api: Pick<Api, "sendMessage">, chatId: number | string, reply: Reply, replyToMessageId?: number): Promise<void> {
+  if (reply.kind === "proposal") {
+    await sendProposal(api, chatId, replyToMessageId, reply.proposal);
+    return;
+  }
+  const keyboard = reply.buttons && reply.buttons.length > 0 ? new InlineKeyboard() : undefined;
+  (reply.buttons ?? []).forEach((button, i) => {
+    if (i > 0) keyboard?.row(); // one button per row, and no empty row at the end
+    keyboard?.text(button.label, button.data);
+  });
+  await api.sendMessage(chatId, reply.text, {
+    link_preview_options: { is_disabled: true },
+    ...(reply.html ? { parse_mode: "HTML" as const } : {}),
+    ...(keyboard ? { reply_markup: keyboard } : {}),
+    ...(replyToMessageId === undefined ? {} : { reply_parameters: { message_id: replyToMessageId } }),
+  });
+}
+
 /** Registers the message and button handlers on a grammy bot. */
 export function registerHandlers(bot: Bot, deps: HandlerDeps): void {
   const isAdmin = telegramAdminLookup(bot.api);
@@ -52,23 +72,11 @@ export function registerHandlers(bot: Bot, deps: HandlerDeps): void {
         deps.router,
         toIncoming({ chatId: ctx.chat.id, from: message.from, text, date: message.date, ...(message.entities ? { entities: message.entities } : {}) }, admin),
       );
-      for (const reply of replies) await send(reply);
+      for (const reply of replies) await sendReply(ctx.api, ctx.chat.id, reply, message.message_id);
       deps.onHandled?.({ chatId: String(ctx.chat.id), userId: `tg:${message.from.id}`, kind: text.startsWith("/") ? (text.split(/[\s@]/)[0] ?? "/") : "mention", replies: replies.map((r) => (r.kind === "proposal" ? `proposal:${r.proposal.kind}` : "text")) });
     } catch (error) {
       onError(error, "message");
       await ctx.reply("Sorry, something went wrong. Please try again.", { reply_parameters: { message_id: message.message_id } }).catch(() => undefined);
-    }
-
-    async function send(reply: Reply): Promise<void> {
-      if (reply.kind === "proposal") {
-        await sendProposal(ctx.api, ctx.chat.id, message.message_id, reply.proposal);
-        return;
-      }
-      await ctx.reply(reply.text, {
-        reply_parameters: { message_id: message.message_id },
-        link_preview_options: { is_disabled: true },
-        ...(reply.html ? { parse_mode: "HTML" as const } : {}),
-      });
     }
   });
 
@@ -76,6 +84,17 @@ export function registerHandlers(bot: Bot, deps: HandlerDeps): void {
     const chatId = ctx.callbackQuery.message?.chat.id ?? ctx.chat?.id;
     if (chatId === undefined) {
       await ctx.answerCallbackQuery();
+      return;
+    }
+    // A tap on an item of the /history list: anyone in the group may read it.
+    const rootId = parseHistoryCallback(ctx.callbackQuery.data);
+    if (rootId !== null) {
+      try {
+        await ctx.answerCallbackQuery();
+        for (const reply of handleHistoryPick(deps.router, String(chatId), rootId)) await sendReply(ctx.api, chatId, reply);
+      } catch (error) {
+        onError(error, "history");
+      }
       return;
     }
     await handleProposalCallback(

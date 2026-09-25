@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isValidIsoDate } from "../core/fact.js";
-import { isTransientError, type GeminiClient } from "./gemini.js";
+import { isQuotaExhausted, isTransientError, type GeminiClient } from "./gemini.js";
 
 // Fact extraction: turns one chat message into a structured proposal with Gemini.
 //
@@ -24,6 +24,11 @@ export class ExtractionError extends Error {
   constructor(message: string, readonly causes: unknown[] = []) {
     super(message, causes[0] === undefined ? undefined : { cause: causes[0] });
     this.name = "ExtractionError";
+  }
+
+  /** True when every attempt failed because the AI quota is used up (so the user can be told why). */
+  get quotaExhausted(): boolean {
+    return this.causes.length > 0 && this.causes.every(isQuotaExhausted);
   }
 }
 
