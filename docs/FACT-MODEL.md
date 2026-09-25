@@ -6,7 +6,7 @@ Implementation: [`src/core/fact.ts`](../src/core/fact.ts). Tests: `src/core/fact
 ## Format
 
 ```
-[COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26 topic=-
+[COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26 topic=- at=2026-09-25T10%3A00%3A00.000Z
 Maria committed to sending the budget by Friday, 2026-09-26.
 ```
 
@@ -15,7 +15,7 @@ Maria committed to sending the budget by Friday, 2026-09-26.
   and what the bot shows to users. It may span several lines and is trimmed.
 - Values are percent-encoded (`encodeURIComponent`), so spaces, `=` and accents are safe.
   A missing value is written as `-`; a literal `-` is written as `%2D`.
-- Key order is fixed on write (`id supersedes author owner due topic`); the parser accepts any
+- Key order is fixed on write (`id supersedes author owner due topic at`); the parser accepts any
   order, rejects unknown or duplicate keys, and only requires `id`, `supersedes` and `author`.
 
 ## Types
@@ -40,6 +40,7 @@ Facts are never edited or deleted (Walrus is append-only). A change is a new
 | `owner` | free text (a person's name) | who is responsible; may differ from `author` |
 | `due` | ISO date `YYYY-MM-DD` | in the group's timezone; real calendar dates only |
 | `topic` | short key, e.g. `delivery` | optional, used by `/decisions` (P1) |
+| `at` | ISO instant with milliseconds, e.g. `2026-09-25T10:00:00.123Z` | when the message happened; stamped by the ledger. Orders facts independently of Walrus write time, so a ledger rebuilt from Walrus resolves to the same state |
 
 ## API
 

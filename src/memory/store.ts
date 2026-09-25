@@ -25,6 +25,8 @@ export interface RecallOptions {
 export interface RememberOptions {
   /** How long to wait for the write to reach `done` (default 90 s; real writes take ~25–35 s). */
   timeoutMs?: number;
+  /** Same key → same write: the relayer de-duplicates retries of an uncertain write. */
+  idempotencyKey?: string;
 }
 
 export interface RememberedMemory {
@@ -69,7 +71,7 @@ export function groupNamespace(groupId: string): string {
 
 /** The subset of the MemWal / MemWalMock client that this layer uses. */
 export interface MemWalClient {
-  rememberAndWait(text: string, namespace?: string, opts?: { timeoutMs?: number }): Promise<{ blob_id: string; namespace: string }>;
+  rememberAndWait(text: string, namespace?: string, opts?: { timeoutMs?: number; idempotencyKey?: string }): Promise<{ blob_id: string; namespace: string }>;
   recall(params: {
     query: string;
     namespace?: string;
@@ -95,7 +97,10 @@ export class SdkMemoryStore implements MemoryStore {
     const namespace = groupNamespace(groupId);
     if (!text.trim()) throw new MemoryError("cannot remember empty text");
     try {
-      const r = await this.client.rememberAndWait(text, namespace, { timeoutMs: options.timeoutMs ?? DEFAULT_WRITE_TIMEOUT_MS });
+      const r = await this.client.rememberAndWait(text, namespace, {
+        timeoutMs: options.timeoutMs ?? DEFAULT_WRITE_TIMEOUT_MS,
+        ...(options.idempotencyKey ? { idempotencyKey: options.idempotencyKey } : {}),
+      });
       return { blobId: r.blob_id, namespace: r.namespace };
     } catch (cause) {
       throw new MemoryError(`remember failed in ${namespace}`, { cause });

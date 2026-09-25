@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 
 // Fact model v1: the unit of memory written to Walrus. See docs/FACT-MODEL.md.
 //
-//   [COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26
+//   [COMMITMENT v1] id=c_7f3a9b21 supersedes=- author=tg%3A123456 owner=Maria due=2026-09-26 topic=- at=2026-09-25T10%3A00%3A00.000Z
 //   Maria committed to sending the budget by Friday, 2026-09-26.
 //
 // The first line is a machine-readable header; the rest is a human-readable sentence
@@ -26,6 +26,12 @@ export interface Fact {
   due: string | null;
   /** Optional explicit topic key, e.g. "delivery" (used by /decisions, P1). */
   topic: string | null;
+  /**
+   * When the message happened, as an ISO instant with milliseconds ("2026-09-25T10:00:00.000Z").
+   * It orders facts independently of when Walrus finished writing them, so a ledger rebuilt from
+   * Walrus resolves to the same state. Stamped by the ledger when a fact is added.
+   */
+  at: string | null;
   /** Human-readable sentence. */
   text: string;
 }
@@ -42,7 +48,7 @@ const ID_RE = /^[dcak]_[0-9a-f]{8}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const HEADER_RE = /^\[([A-Z]+) v(\d+)\]((?: [a-z]+=\S*)*)$/;
 const NULL_TOKEN = "-";
-const KEYS = ["id", "supersedes", "author", "owner", "due", "topic"] as const;
+const KEYS = ["id", "supersedes", "author", "owner", "due", "topic", "at"] as const;
 
 export function newFactId(type: FactType): string {
   return `${ID_PREFIX[type]}_${randomBytes(4).toString("hex")}`;
@@ -52,6 +58,11 @@ export function isValidIsoDate(value: string): boolean {
   if (!DATE_RE.test(value)) return false;
   const d = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+export function isValidInstant(value: string): boolean {
+  const ms = Date.parse(value);
+  return !Number.isNaN(ms) && new Date(ms).toISOString() === value;
 }
 
 // A literal "-" is escaped so it never collides with the null token.
@@ -65,6 +76,7 @@ export function validateFact(fact: Fact): void {
   if (!fact.author.trim()) throw new FactError("author is required");
   if (!fact.text.trim()) throw new FactError("text is required");
   if (fact.due !== null && !isValidIsoDate(fact.due)) throw new FactError(`invalid due date: ${fact.due}`);
+  if (fact.at !== null && !isValidInstant(fact.at)) throw new FactError(`invalid at instant: ${fact.at}`);
   if (fact.supersedes !== null && !ID_RE.test(fact.supersedes)) throw new FactError(`invalid supersedes id: ${fact.supersedes}`);
   if (fact.supersedes === fact.id) throw new FactError("a fact cannot supersede itself");
 
@@ -83,6 +95,7 @@ export function serializeFact(fact: Fact): string {
     owner: fact.owner,
     due: fact.due,
     topic: fact.topic,
+    at: fact.at,
   };
   const pairs = KEYS.map((k) => `${k}=${enc(values[k])}`).join(" ");
   return `[${fact.type} v${FACT_VERSION}] ${pairs}\n${fact.text.trim()}`;
@@ -135,6 +148,7 @@ export function parseFact(raw: string): Fact {
     owner: get("owner"),
     due: get("due"),
     topic: get("topic"),
+    at: get("at"),
     text,
   };
   validateFact(fact);

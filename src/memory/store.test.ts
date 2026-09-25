@@ -109,6 +109,12 @@ test("options are forwarded (sort, limit, maxDistance, timeout)", async () => {
   assert.deepEqual(calls[1]?.args[0], { query: "q", namespace: "grp:g1", limit: 10, maxDistance: 0.4, sort: "recent" });
 });
 
+test("the idempotency key is forwarded to the SDK", async () => {
+  const { client, calls } = fakeClient();
+  await new SdkMemoryStore(client, "real").remember("g1", "text", { idempotencyKey: "g1:c_00000001" });
+  assert.deepEqual(calls[0]?.args[2], { timeoutMs: 90_000, idempotencyKey: "g1:c_00000001" });
+});
+
 test("recall maps SDK results to the domain shape", async () => {
   const { client } = fakeClient();
   const [m] = await new SdkMemoryStore(client, "real").recall("g1", "q");

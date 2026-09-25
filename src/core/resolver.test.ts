@@ -11,7 +11,7 @@ let seq = 0;
 const entry = (fact: Partial<Fact> & Pick<Fact, "id" | "type">, createdAt = "2026-09-24T10:00:00Z", s = ++seq): LedgerEntry => ({
   seq: s,
   createdAt,
-  fact: { supersedes: null, author: "tg:1", owner: null, due: null, topic: null, text: `text of ${fact.id}`, ...fact },
+  fact: { supersedes: null, author: "tg:1", owner: null, due: null, topic: null, at: null, text: `text of ${fact.id}`, ...fact },
 });
 const commitment = (id: string, owner: string, due: string | null, createdAt?: string) => entry({ id, type: "COMMITMENT", owner, due }, createdAt);
 const amend = (id: string, parent: string, due: string | null, createdAt?: string, s?: number) => entry({ id, type: "AMENDMENT", supersedes: parent, due }, createdAt, s);
