@@ -20,7 +20,7 @@ Built by ParaDevs for **Walrus Sessions 8: Chatbots That Remember**
 - LLM: Gemini (the "Beyond the Big Two" track), used only to interpret natural language.
 
 Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/FACT-MODEL.md](docs/FACT-MODEL.md), [docs/HACKATHON.md](docs/HACKATHON.md),
-[docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md).
+[docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EXTRACTOR.md](docs/EXTRACTOR.md).
 
 ## Requirements
 - Node.js ≥ 22 (`nvm use`); the SQLite driver (`better-sqlite3` 13) requires it
@@ -44,6 +44,7 @@ npm run dev
 | `TELEGRAM_BOT_TOKEN` | to run the bot | token from @BotFather |
 | `GEMINI_API_KEY` | to run the bot | Google AI Studio key |
 | `GEMINI_MODEL` | to run the bot | model name (decision D-05) |
+| `GEMINI_FALLBACK_MODEL` | no | backup model for persistent errors or invalid output |
 | `DB_PATH` | no | SQLite cache (`./data/palavra.db`) |
 | `DEFAULT_TIMEZONE` | no | `America/Sao_Paulo` |
 | `WALRUSCAN_BLOB_URL` | no | base URL for proof links |
@@ -65,8 +66,9 @@ npm run dev
 
 ## Layout
 ```
-src/bot/        Telegram: commands, buttons
-src/core/       extractor, State Resolver, ledger, outbox
+src/bot/        Telegram: buttons, messages (commands: in progress)
+src/llm/        Gemini client and fact extraction
+src/core/       State Resolver, ledger, outbox, proposals
 src/memory/     MemWal wrapper + MemWalMock
 src/reminders/  deterministic reminders
 eval/           eval scenarios and runner

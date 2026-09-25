@@ -24,3 +24,13 @@ test("real mode requires the delegate key and the account id", () => {
 test("invalid mode is rejected", () => {
   assert.throws(() => loadConfig({ MEMWAL_MODE: "prod" }), /Invalid configuration/);
 });
+
+test("an invalid timezone stops the bot at startup (rule T1)", () => {
+  assert.throws(() => loadConfig({ DEFAULT_TIMEZONE: "Mars/Olympus" }), /DEFAULT_TIMEZONE[\s\S]*not a valid IANA timezone/);
+  assert.equal(loadConfig({ DEFAULT_TIMEZONE: "Europe/Lisbon" }).DEFAULT_TIMEZONE, "Europe/Lisbon");
+});
+
+test("the fallback model is optional", () => {
+  assert.equal(loadConfig({}).GEMINI_FALLBACK_MODEL, undefined);
+  assert.equal(loadConfig({ GEMINI_FALLBACK_MODEL: "gemini-3.5-flash" }).GEMINI_FALLBACK_MODEL, "gemini-3.5-flash");
+});
