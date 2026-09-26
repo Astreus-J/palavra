@@ -41,6 +41,9 @@ correct answer phrased differently by the LLM is still a hit.
 - Group timezone `America/Sao_Paulo` (UTC-3). One group per scenario, namespace `grp:eval-<id>`.
 - Session 1 runs on **Thu 2026-09-24**, starting at 10:00 local (`13:00:00Z`).
 - Fact text is the sentence the bot would write; the header fields are the ones listed.
+- Fact ids in the YAML (`c_budget`, `a_budget1`, ...) are **aliases**, not valid fact ids (the fact
+  model requires `<d|c|a|k>_<8 hex>`). The runner assigns real ids with `newFactId(type)` and maps
+  each alias, including in `supersedes`, to the real id.
 
 ---
 
@@ -263,9 +266,9 @@ expected: { no-recall: miss, recall: unstable, resolver: hit }
 ## Part 2 — QA (manual, Telegram test group)
 
 Run in the test group with 3 accounts: **Maria** (member), **Pedro** (member), **Ana** (admin).
-Use `MEMWAL_MODE=mainnet`. Mark each case pass or fail; every failure becomes a Plane task with
-the steps below. Replies are in English (D-08); exact wording is owned by HACKATONSU-23, so check the
-**content** listed, not the phrasing.
+Use `MEMWAL_MODE=real` (Walrus mainnet). Mark each case pass or fail; every failure becomes a Plane
+task with the steps below. Replies are in English (D-08); exact wording is owned by HACKATONSU-23, so
+check the **content** listed, not the phrasing.
 
 | ID | Steps | Expected | Rule |
 |---|---|---|---|
