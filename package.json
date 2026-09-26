@@ -17,7 +17,8 @@
     "eval": "tsx eval/run.ts",
     "setup:hooks": "git config core.hooksPath .githooks",
     "restore-test": "tsx scripts/restore-test.ts",
-    "receipt-demo": "tsx scripts/receipt-demo.ts"
+    "receipt-demo": "tsx scripts/receipt-demo.ts",
+    "reminder-demo": "tsx scripts/reminder-demo.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

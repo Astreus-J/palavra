@@ -16,6 +16,7 @@ const schema = z
     GEMINI_FALLBACK_MODEL: opt(z.string()),
     DB_PATH: z.preprocess(empty, z.string().default("./data/palavra.db")),
     DEFAULT_TIMEZONE: z.preprocess(empty, z.string().default("America/Sao_Paulo")),
+    REMINDER_HOUR: z.preprocess(empty, z.coerce.number().int().min(0).max(23).default(9)),
     WALRUSCAN_BLOB_URL: z.preprocess(empty, z.string().url().default("https://walruscan.com/mainnet/blob")),
     LOG_LEVEL: z.preprocess(empty, z.enum(["fatal", "error", "warn", "info", "debug"]).default("info")),
   })

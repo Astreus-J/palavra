@@ -30,6 +30,14 @@ test("an invalid timezone stops the bot at startup (rule T1)", () => {
   assert.equal(loadConfig({ DEFAULT_TIMEZONE: "Europe/Lisbon" }).DEFAULT_TIMEZONE, "Europe/Lisbon");
 });
 
+test("REMINDER_HOUR defaults to 9 and must be an hour of the day", () => {
+  assert.equal(loadConfig({}).REMINDER_HOUR, 9);
+  assert.equal(loadConfig({ REMINDER_HOUR: "" }).REMINDER_HOUR, 9);
+  assert.equal(loadConfig({ REMINDER_HOUR: "14" }).REMINDER_HOUR, 14);
+  assert.equal(loadConfig({ REMINDER_HOUR: "0" }).REMINDER_HOUR, 0);
+  for (const bad of ["24", "-1", "9.5", "nine"]) assert.throws(() => loadConfig({ REMINDER_HOUR: bad }), /Invalid configuration/, bad);
+});
+
 test("the fallback model is optional", () => {
   assert.equal(loadConfig({}).GEMINI_FALLBACK_MODEL, undefined);
   assert.equal(loadConfig({ GEMINI_FALLBACK_MODEL: "gemini-3.5-flash" }).GEMINI_FALLBACK_MODEL, "gemini-3.5-flash");

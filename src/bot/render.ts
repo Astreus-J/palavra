@@ -20,7 +20,8 @@ function dayIn(instant: string, timeZone: string): string {
   return formatDate(`${get("year")}-${get("month")}-${get("day")}`);
 }
 
-function pendingLine(item: ItemState): string {
+/** One line of a list of commitments, shared by /pending and the reminders. */
+export function pendingLine(item: ItemState): string {
   const when = item.due === null ? "no deadline" : `${item.status === "overdue" ? "was due" : "due"} ${formatDate(item.due)}`;
   return `• ${escapeHtml(item.owner ?? "?")} — ${escapeHtml(taskOf(item))} — ${when}`;
 }
