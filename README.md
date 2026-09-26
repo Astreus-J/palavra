@@ -20,10 +20,10 @@ Built by ParaDevs for **Walrus Sessions 8: Chatbots That Remember**
 - LLM: Gemini (the "Beyond the Big Two" track), used only to interpret natural language.
 
 Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/FACT-MODEL.md](docs/FACT-MODEL.md), [docs/HACKATHON.md](docs/HACKATHON.md),
-[docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md).
+[docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EXTRACTOR.md](docs/EXTRACTOR.md), [docs/REMINDERS.md](docs/REMINDERS.md).
 
 ## Requirements
-- Node.js ≥ 20 (`nvm use`)
+- Node.js ≥ 22 (`nvm use`); the SQLite driver (`better-sqlite3` 13) requires it
 
 ## Setup
 ```bash
@@ -44,9 +44,11 @@ npm run dev
 | `TELEGRAM_BOT_TOKEN` | to run the bot | token from @BotFather |
 | `GEMINI_API_KEY` | to run the bot | Google AI Studio key |
 | `GEMINI_MODEL` | to run the bot | model name (decision D-05) |
+| `GEMINI_FALLBACK_MODEL` | no | backup model for persistent errors or invalid output |
 | `DB_PATH` | no | SQLite cache (`./data/palavra.db`) |
 | `DEFAULT_TIMEZONE` | no | `America/Sao_Paulo` |
 | `WALRUSCAN_BLOB_URL` | no | base URL for proof links |
+| `REMINDER_HOUR` | no | hour of the day (0-23) from which deadline reminders are sent (`9`) |
 | `LOG_LEVEL` | no | `info` |
 
 ## Commands (bot)
@@ -60,15 +62,18 @@ npm run dev
 | `npm run typecheck` | type check |
 | `npm test` | tests (node:test) |
 | `npm run eval` | 3-arm eval (in progress) |
+| `npm run reminder-demo` | live demo of the reminders with a simulated clock (`-- --chat <id>`) |
+| `npm run receipt-demo` | live demo of the two-phase receipt in a chat (`-- --chat <id> --real` for mainnet) |
 | `npm run restore-test` | delete the SQLite ledger, rebuild it from Walrus and compare the state (`-- --real` for mainnet) |
 | `npm run build` / `start` | compile and run `dist/` |
 
 ## Layout
 ```
-src/bot/        Telegram: commands, buttons
-src/core/       extractor, State Resolver, ledger, outbox
+src/bot/        Telegram: commands, buttons, messages, receipts
+src/llm/        Gemini client and fact extraction
+src/core/       State Resolver, ledger, outbox, proposals
 src/memory/     MemWal wrapper + MemWalMock
-src/reminders/  deterministic reminders
+src/reminders/  deterministic deadline reminders
 eval/           eval scenarios and runner
 bugs/           minimal reproductions for the Bug Bounty
 docs/           rules, deliverables, decisions, evidence

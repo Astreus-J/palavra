@@ -25,3 +25,13 @@ Suggested paragraph for the "before/after" section (task HACKATONSU-34):
 > list, every chain of amendments, the owners, the due dates and the blob id of each fact came back identical.
 > Ordering is the subtle part: Walrus writes are asynchronous and can finish out of order, so each fact carries
 > its own event time instead of relying on the write time. Reproduce it with `npm run restore-test -- --real`.
+
+## Two-phase receipt (task HACKATONSU-21)
+Live run on 2026-09-25 in the test group, on Walrus mainnet (`npm run receipt-demo -- --chat <id> --real`):
+
+1. The bot posted a message ending in **⏳ Saving to Walrus…**.
+2. The outbox wrote the fact to Walrus in 37.7 s (blob `3MMaJspAb79PnsKCiKxM4ogcpL0qj0SO6EROZ-tc91I`).
+3. The **same message** was edited to **🔗 Saved on Walrus: proof**, linking to
+   [Walruscan](https://walruscan.com/mainnet/blob/3MMaJspAb79PnsKCiKxM4ogcpL0qj0SO6EROZ-tc91I).
+
+If Walrus keeps refusing the write, the message becomes an error with a **🔄 Try again** button (covered by tests).

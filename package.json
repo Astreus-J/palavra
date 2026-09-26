@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -16,7 +16,9 @@
     "test": "tsx scripts/test.ts",
     "eval": "tsx eval/run.ts",
     "setup:hooks": "git config core.hooksPath .githooks",
-    "restore-test": "tsx scripts/restore-test.ts"
+    "restore-test": "tsx scripts/restore-test.ts",
+    "receipt-demo": "tsx scripts/receipt-demo.ts",
+    "reminder-demo": "tsx scripts/reminder-demo.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

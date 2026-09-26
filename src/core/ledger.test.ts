@@ -9,7 +9,7 @@ import { Ledger, LedgerError } from "./ledger.js";
 const T0 = new Date("2026-09-25T10:00:00.000Z");
 const at = (ms: number) => new Date(T0.getTime() + ms);
 const fact = (over: Partial<Fact> = {}): Fact => ({
-  id: "c_00000001", type: "COMMITMENT", supersedes: null, author: "tg:1", owner: "Maria", due: "2026-09-30", topic: null, at: null,
+  id: "c_00000001", type: "COMMITMENT", supersedes: null, author: "tg:1", owner: "Maria", due: "2026-09-30", topic: null, at: null, task: null,
   text: "Maria will send the budget.", ...over,
 });
 
@@ -20,13 +20,13 @@ test("a new fact enters as pending, stamped with `at` when it has none", () => {
   assert.equal(row.status, "pending");
   assert.equal(row.blobId, null);
   assert.equal(row.attempts, 0);
-  assert.match(row.raw, / at=2026-09-25T10%3A00%3A00\.000Z\n/);
+  assert.match(row.raw, / at=2026-09-25T10%3A00%3A00\.000Z[ \n]/);
 });
 
 test("an explicit `at` is kept", () => {
   const ledger = Ledger.open(":memory:");
   const { row } = ledger.addFact("g1", fact({ at: "2026-09-24T08:00:00.000Z" }), T0);
-  assert.match(row.raw, / at=2026-09-24T08%3A00%3A00\.000Z\n/);
+  assert.match(row.raw, / at=2026-09-24T08%3A00%3A00\.000Z[ \n]/);
 });
 
 test("adding the same fact twice is idempotent: one row, no second write queued", () => {
@@ -45,7 +45,7 @@ test("retrying the same fact without `at` keeps the original timestamp", () => {
   const retry = ledger.addFact("g1", fact(), at(90_000));
   assert.equal(retry.inserted, false);
   assert.equal(retry.row.raw, first.row.raw);
-  assert.match(retry.row.raw, / at=2026-09-25T10%3A00%3A00\.000Z\n/);
+  assert.match(retry.row.raw, / at=2026-09-25T10%3A00%3A00\.000Z[ \n]/);
 });
 
 test("the same id with a different explicit `at` is a conflict", () => {
@@ -107,6 +107,20 @@ test("failed rows are excluded from entries by default and can be requeued", () 
   const back = ledger.getRow("g1", "c_00000001")!;
   assert.equal(back.status, "pending");
   assert.equal(back.attempts, 0);
+});
+
+test("requeueFact puts only that failed fact back in the queue", () => {
+  const ledger = Ledger.open(":memory:");
+  const a = ledger.addFact("g1", fact(), T0).row;
+  const b = ledger.addFact("g1", fact({ id: "c_00000002", text: "Other." }), T0).row;
+  ledger.markFailed(a.seq, "boom", at(1));
+  ledger.markFailed(b.seq, "boom", at(1));
+  assert.equal(ledger.requeueFact("g1", "c_00000001", at(2)), true);
+  assert.equal(ledger.getRow("g1", "c_00000001")!.status, "pending");
+  assert.equal(ledger.getRow("g1", "c_00000001")!.attempts, 0);
+  assert.equal(ledger.getRow("g1", "c_00000002")!.status, "failed", "the other one is untouched");
+  assert.equal(ledger.requeueFact("g1", "c_00000001", at(3)), false, "no longer failed");
+  assert.equal(ledger.requeueFact("g2", "c_00000002", at(3)), false, "another group");
 });
 
 test("entries feed the resolver: parsed facts, pending included, ordered by insertion", () => {

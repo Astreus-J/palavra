@@ -53,6 +53,7 @@ export class Outbox {
   private readonly verifyDelays: readonly number[];
   private readonly onEvent: (event: OutboxEvent) => void;
   private flushing: Promise<FlushReport> | null = null;
+  private rerun = false;
 
   constructor(options: OutboxOptions) {
     this.store = options.store;
@@ -70,12 +71,30 @@ export class Outbox {
     return this.retryDelays[Math.min(attempts, this.retryDelays.length) - 1] ?? 0;
   }
 
-  /** Processes everything that is due. Concurrent calls share one run, so nothing is written twice. */
+  /**
+   * Processes everything that is due. Concurrent calls share one run, so nothing is written twice. A call
+   * that arrives while a run is in progress makes it run once more when it ends, so a fact added in the
+   * meantime is not left waiting for the next timer tick.
+   */
   flush(): Promise<FlushReport> {
-    this.flushing ??= this.run().finally(() => {
+    if (this.flushing) {
+      this.rerun = true;
+      return this.flushing;
+    }
+    this.flushing = this.runUntilQuiet().finally(() => {
       this.flushing = null;
     });
     return this.flushing;
+  }
+
+  private async runUntilQuiet(): Promise<FlushReport> {
+    const total = await this.run();
+    while (this.rerun) {
+      this.rerun = false;
+      const next = await this.run();
+      for (const key of Object.keys(total) as (keyof FlushReport)[]) total[key] += next[key];
+    }
+    return total;
   }
 
   private async run(): Promise<FlushReport> {

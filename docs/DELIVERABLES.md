@@ -33,13 +33,13 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] Oct 16: results. If we win, confirm by email and send the wallet within 21 days
 
 ## E. Product deliverables (P0 of the design)
-- [ ] Record a decision/commitment (`/palavra`, mention)
-- [ ] Amendment and completion with supersession + button/reply confirmation
-- [ ] State Resolver (pure code) + local ledger rebuildable from Walrus
-- [ ] `/pending` + deterministic reminders
-- [ ] `/history` with the change chain and Walruscan receipts
+- [x] Record a decision/commitment (`/palavra`, mention)
+- [x] Amendment and completion with supersession + button/reply confirmation
+- [x] State Resolver (pure code) + local ledger rebuildable from Walrus
+- [x] `/pending` + deterministic reminders (see docs/REMINDERS.md)
+- [x] `/history` with the change chain and Walruscan receipts (pick from a list or search)
 - [ ] Free-form question answered through recall, citing blobs
-- [ ] Two-phase receipt (⏳ → 🔗)
+- [x] Two-phase receipt (⏳ → 🔗) (live proof in docs/evidence)
 - [x] Recovery test: delete SQLite, `restore`, state comes back (`npm run restore-test`; evidence in docs/evidence)
 - [ ] `npm run eval` + report on mainnet
 - [ ] P1: `/decisions` with an explicit topic key

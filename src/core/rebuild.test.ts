@@ -10,7 +10,7 @@ import { resolveState, type Resolution } from "./resolver.js";
 
 const NOW = new Date("2026-09-27T12:00:00Z");
 const G = "-5230162759";
-const base = { author: "tg:1", owner: null, due: null, topic: null, supersedes: null } as const;
+const base = { author: "tg:1", owner: null, due: null, topic: null, task: null, supersedes: null } as const;
 const f = (over: Partial<Fact> & Pick<Fact, "id" | "type" | "at">): Fact => ({ ...base, text: `text ${over.id}`, ...over });
 
 // A small history: two commitments (one amended twice), one completed, and one decision.

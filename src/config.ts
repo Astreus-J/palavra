@@ -13,12 +13,19 @@ const schema = z
     TELEGRAM_BOT_TOKEN: opt(z.string()),
     GEMINI_API_KEY: opt(z.string()),
     GEMINI_MODEL: opt(z.string()),
+    GEMINI_FALLBACK_MODEL: opt(z.string()),
     DB_PATH: z.preprocess(empty, z.string().default("./data/palavra.db")),
     DEFAULT_TIMEZONE: z.preprocess(empty, z.string().default("America/Sao_Paulo")),
+    REMINDER_HOUR: z.preprocess(empty, z.coerce.number().int().min(0).max(23).default(9)),
     WALRUSCAN_BLOB_URL: z.preprocess(empty, z.string().url().default("https://walruscan.com/mainnet/blob")),
     LOG_LEVEL: z.preprocess(empty, z.enum(["fatal", "error", "warn", "info", "debug"]).default("info")),
   })
   .superRefine((env, ctx) => {
+    try {
+      new Intl.DateTimeFormat("en-CA", { timeZone: env.DEFAULT_TIMEZONE });
+    } catch {
+      ctx.addIssue({ code: "custom", path: ["DEFAULT_TIMEZONE"], message: `not a valid IANA timezone: ${env.DEFAULT_TIMEZONE}` });
+    }
     if (env.MEMWAL_MODE !== "real") return;
     for (const key of ["MEMWAL_PRIVATE_KEY", "MEMWAL_ACCOUNT_ID"] as const) {
       if (!env[key]) ctx.addIssue({ code: "custom", path: [key], message: `required when MEMWAL_MODE=real` });
