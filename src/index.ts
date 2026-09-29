@@ -4,7 +4,7 @@ import { loadConfig, requireBotSecrets } from "./config.js";
 import { Ledger } from "./core/ledger.js";
 import { Outbox } from "./core/outbox.js";
 import { ProposalService, ProposalStore } from "./core/proposals.js";
-import { createGeminiClient } from "./llm/gemini.js";
+import { createOpenRouterClient } from "./llm/openrouter.js";
 import { createMemoryStore } from "./memory/index.js";
 import { ReceiptStore, ReceiptUpdater } from "./bot/receipts.js";
 import { registerHandlers } from "./bot/telegram.js";
@@ -41,12 +41,12 @@ async function main(): Promise<void> {
   const receipts = ReceiptStore.open(cfg.DB_PATH);
   const reminderStore = ReminderStore.open(cfg.DB_PATH);
   const outbox = new Outbox({ store: memory, ledger, onEvent: (event) => log.warn({ event }, "outbox event") });
-  const models = [secrets.geminiModel, ...(cfg.GEMINI_FALLBACK_MODEL ? [cfg.GEMINI_FALLBACK_MODEL] : [])];
+  const models = secrets.openrouterModels;
   const service = new ProposalService({
     ledger,
     proposals,
     timeZone: cfg.DEFAULT_TIMEZONE,
-    llm: { client: createGeminiClient(secrets.geminiApiKey), models },
+    llm: { client: createOpenRouterClient(secrets.openrouterApiKey), models },
   });
 
   const bot = new Bot(secrets.telegramToken);

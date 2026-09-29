@@ -19,7 +19,7 @@ deadline (Oct 9, 2026).
 ## 2. Architecture
 
 ```
-Telegram (group) ── command/mention ──▶  Extractor (Gemini, structured JSON)
+Telegram (group) ── command/mention ──▶  Extractor (OpenRouter, structured JSON)
                                               │
                                     proposed fact + candidates
                                               ▼
@@ -33,7 +33,7 @@ Telegram (group) ── command/mention ──▶  Extractor (Gemini, structured
                                    Walrus Memory (rememberAndWait)
                                    namespace grp:<chat_id>  → blob_id
                                                 │
-              free-form questions ── recall(sort:"recent") ──▶ Gemini ──▶ answer + receipts
+              free-form questions ── recall(sort:"recent") ──▶ OpenRouter ──▶ answer + receipts
 ```
 
 Rules:
@@ -64,9 +64,9 @@ order, never by text (a real problem reported with second-level ties in recall r
 
 ## 4. Deciding "does this amend that commitment?"
 
-1. Gemini extracts `{type, owner, task, due}` from the message (JSON with a schema).
+1. The model extracts `{type, owner, task, due}` from the message (JSON with a schema).
 2. If the type is amendment/completion, code lists the open commitments of that `owner` in
-   the ledger (few, simple filter) and asks Gemini only to **choose among them** (or "none").
+   the ledger (few, simple filter) and asks the model only to **choose among them** (or "none").
 3. The bot shows the result and asks for confirmation:
    `Update "budget — Friday" → Saturday?  [✅ Yes] [➕ It's another one] [✖]`
 4. Only after ✅ is it written. This avoids wrong supersession and doubles as demo material.
@@ -144,4 +144,4 @@ docs/            architecture, article, blob ledger
 
 ## 11. Open decisions
 
-See `DECISIONS.md` (D-05: exact Gemini model).
+See `DECISIONS.md` (D-05: OpenRouter model chain).

@@ -11,7 +11,7 @@ import { chooseCandidate, extractFact, type CallOptions, type Candidate } from "
 
 // Proposals: nothing reaches the ledger or Walrus until the right person confirms it.
 //
-//   message → extraction (Gemini) → proposal (stored, expires in 24 h) → ✅ by an allowed person → fact in the ledger
+//   message → extraction (OpenRouter) → proposal (stored, expires in 24 h) → ✅ by an allowed person → fact in the ledger
 //
 // The rules are those of docs/PRODUCT.md: authorship and permissions (A1-A6), amendment vs. new
 // commitment (M1-M6), deadlines and timezone (D8-D10, T2-T3).

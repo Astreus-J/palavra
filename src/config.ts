@@ -4,6 +4,20 @@ import { z } from "zod";
 const empty = (v: unknown) => (v === "" ? undefined : v);
 const opt = <T extends z.ZodType>(schema: T) => z.preprocess(empty, schema.optional());
 
+// Free OpenRouter models, ordered by measured accuracy on eval/fixtures/extraction-cases.json
+// (see eval/openrouter-extraction.ts --all), not just declared JSON-schema support. None is from
+// Anthropic or OpenAI (Beyond the Big Two track). Full rationale and measured numbers: D-05 in
+// docs/DECISIONS.md.
+export const DEFAULT_OPENROUTER_MODELS = [
+  "dots-studio/dots-3-note-preview:free",
+  "liquid/lfm-2.5-2.6b:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "google/gemma-4-31b-it:free",
+  "qwen/qwen3.8-27b:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "openrouter/free",
+] as const;
+
 const schema = z
   .object({
     MEMWAL_MODE: z.enum(["mock", "real"]).default("mock"),
@@ -11,9 +25,8 @@ const schema = z
     MEMWAL_ACCOUNT_ID: opt(z.string()),
     MEMWAL_SERVER_URL: z.preprocess(empty, z.string().url().default("https://relayer.memory.walrus.xyz")),
     TELEGRAM_BOT_TOKEN: opt(z.string()),
-    GEMINI_API_KEY: opt(z.string()),
-    GEMINI_MODEL: opt(z.string()),
-    GEMINI_FALLBACK_MODEL: opt(z.string()),
+    OPENROUTER_API_KEY: opt(z.string()),
+    OPENROUTER_MODELS: z.preprocess(empty, z.string().default(DEFAULT_OPENROUTER_MODELS.join(","))),
     DB_PATH: z.preprocess(empty, z.string().default("./data/palavra.db")),
     DEFAULT_TIMEZONE: z.preprocess(empty, z.string().default("America/Sao_Paulo")),
     REMINDER_HOUR: z.preprocess(empty, z.coerce.number().int().min(0).max(23).default(9)),
@@ -44,8 +57,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 }
 
 // Only needed to run the bot (not for tests/eval with the mock).
-export function requireBotSecrets(cfg: Config): { telegramToken: string; geminiApiKey: string; geminiModel: string } {
-  const missing = (["TELEGRAM_BOT_TOKEN", "GEMINI_API_KEY", "GEMINI_MODEL"] as const).filter((k) => !cfg[k]);
+export function requireBotSecrets(cfg: Config): { telegramToken: string; openrouterApiKey: string; openrouterModels: string[] } {
+  const missing = (["TELEGRAM_BOT_TOKEN", "OPENROUTER_API_KEY"] as const).filter((k) => !cfg[k]);
   if (missing.length) throw new Error(`Missing variables to start the bot: ${missing.join(", ")}`);
-  return { telegramToken: cfg.TELEGRAM_BOT_TOKEN!, geminiApiKey: cfg.GEMINI_API_KEY!, geminiModel: cfg.GEMINI_MODEL! };
+  const openrouterModels = cfg.OPENROUTER_MODELS.split(",").map((m) => m.trim()).filter(Boolean);
+  if (openrouterModels.length === 0) throw new Error("OPENROUTER_MODELS is empty");
+  return { telegramToken: cfg.TELEGRAM_BOT_TOKEN!, openrouterApiKey: cfg.OPENROUTER_API_KEY!, openrouterModels };
 }

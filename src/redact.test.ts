@@ -15,6 +15,7 @@ test("the bot token inside a Telegram URL is removed", () => {
 test("API keys are removed too, and ordinary text is untouched", () => {
   assert.equal(redact(`key=AIza${"x".repeat(35)} end`), "key=<redacted> end");
   assert.equal(redact(`key=AQ.${"y".repeat(40)}`), "key=<redacted>");
+  assert.equal(redact(`key=sk-or-v1-${"z".repeat(25)}`), "key=<redacted>");
   assert.equal(redact("Bad Request: message is not modified"), "Bad Request: message is not modified");
   assert.equal(redact("bot42:short"), "bot42:short", "not shaped like a token");
 });
