@@ -1,17 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { GeminiClient, GenerateRequest } from "./gemini.js";
-import { isDailyQuota, isQuotaExhausted, isTransientError } from "./gemini.js";
+import type { LLMClient, GenerateRequest } from "./openrouter.js";
+import { isDailyQuota, isQuotaExhausted, isTransientError } from "./openrouter.js";
 import {
   buildSystemPrompt, calendarTable, chooseCandidate, describeToday, ExtractionError, extractFact, parseChoice, parseExtraction, EXTRACTION_SCHEMA, type Candidate,
 } from "./extraction.js";
 
 const ok = (over: object = {}) => JSON.stringify({ type: "COMMITMENT", owner: "Maria", task: "send the budget", due: "2026-09-25", ...over });
 
-/** Fake Gemini client: answers come from a script, one entry per call (a string is a reply, an Error is thrown). */
+/** Fake LLM client: answers come from a script, one entry per call (a string is a reply, an Error is thrown). */
 function scripted(steps: (string | Error)[]) {
   const calls: GenerateRequest[] = [];
-  const client: GeminiClient = {
+  const client: LLMClient = {
     async generate(request) {
       calls.push(request);
       const step = steps[calls.length - 1];
@@ -23,7 +23,7 @@ function scripted(steps: (string | Error)[]) {
   return { client, calls };
 }
 const noSleep = (log: number[] = []) => async (ms: number) => { log.push(ms); };
-const transient = () => new Error("503 UNAVAILABLE: This model is currently experiencing high demand");
+const transient = () => new Error("OpenRouter 503 on primary: model is currently experiencing high demand");
 
 test("the prompt states today with its weekday and requires YYYY-MM-DD, never a date-time", () => {
   assert.equal(describeToday("2026-09-24"), "2026-09-24 (Thursday)");
@@ -133,7 +133,7 @@ test("when every model fails, ExtractionError carries all the causes", async () 
   await assert.rejects(extractFact("x", "Maria", "2026-09-24", { client: scripted([]).client, models: [] }), /no model configured/);
 });
 
-const dailyQuota = () => new Error('{"error":{"code":429,"message":"You exceeded your current quota. Quota exceeded for metric: generate_content_free_tier_requests, limit: 20","status":"RESOURCE_EXHAUSTED","details":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}}');
+const dailyQuota = () => new Error('OpenRouter 429 on primary: {"error":{"message":"Rate limit exceeded: free-models-per-day. Try again in 14h32m.","code":429}}');
 
 test("a daily quota is not retried: it goes straight to the fallback model", async () => {
   const waits: number[] = [];
@@ -158,20 +158,20 @@ test("when every model is out of quota the error says so, so the user can be tol
 });
 
 test("quota helpers: a per-minute limit is retried, a daily one is not", () => {
-  const perMinute = new Error("429 RESOURCE_EXHAUSTED: rate limit, retry in 20s");
+  const perMinute = new Error('OpenRouter 429 on primary: {"error":{"message":"Rate limit exceeded, retry in 20s","code":429}}');
   assert.equal(isQuotaExhausted(perMinute), true);
   assert.equal(isDailyQuota(perMinute), false);
   assert.equal(isTransientError(perMinute), true);
   assert.equal(isDailyQuota(dailyQuota()), true);
   assert.equal(isTransientError(dailyQuota()), false);
-  assert.equal(isQuotaExhausted(new Error("503 unavailable")), false);
+  assert.equal(isQuotaExhausted(new Error("OpenRouter 503 on primary: model is overloaded")), false);
 });
 
 test("isTransientError recognises overload, quota and network errors only", () => {
-  assert.equal(isTransientError(new Error("[503 Service Unavailable] high demand")), true);
-  assert.equal(isTransientError(new Error('{"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}')), true);
+  assert.equal(isTransientError(new Error("OpenRouter 503 on primary: model is currently overloaded")), true);
+  assert.equal(isTransientError(new Error('OpenRouter 429 on primary: {"error":{"message":"Rate limit exceeded","code":429}}')), true);
   assert.equal(isTransientError(new Error("fetch failed")), true);
-  assert.equal(isTransientError(new Error("403 project denied access")), false);
+  assert.equal(isTransientError(new Error("OpenRouter 403 on primary: project denied access")), false);
   assert.equal(isTransientError(new Error("invalid JSON")), false);
 });
 

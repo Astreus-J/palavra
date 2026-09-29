@@ -1,6 +1,6 @@
-import type { GeminiClient, GenerateRequest } from "../llm/gemini.js";
+import type { LLMClient, GenerateRequest } from "../llm/openrouter.js";
 
-/** Fake Gemini: extraction and candidate-choice answers come from queues, in order. */
+/** Fake LLM: extraction and candidate-choice answers come from queues, in order. */
 export class FakeLlm {
   private extractions: object[] = [];
   private choices: string[] = [];
@@ -16,7 +16,7 @@ export class FakeLlm {
   }
   get chooseCalls() { return this.requests.filter((r) => r.prompt.includes("Candidates:")); }
   get extractCalls() { return this.requests.filter((r) => !r.prompt.includes("Candidates:")); }
-  client: GeminiClient = {
+  client: LLMClient = {
     generate: async (request) => {
       this.requests.push(request);
       if (this.failWith) throw this.failWith;

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { GeminiClient } from "../llm/gemini.js";
+import type { LLMClient } from "../llm/openrouter.js";
 import type { Fact } from "../core/fact.js";
 import { Ledger } from "../core/ledger.js";
 import { PROPOSAL_TTL_MS, ProposalService, ProposalStore, type Proposal } from "../core/proposals.js";
@@ -17,7 +17,7 @@ function setup() {
   const clock = { now: new Date(T0) };
   const ledger = Ledger.open(":memory:");
   const answers: object[] = [];
-  const client: GeminiClient = { generate: async () => JSON.stringify(answers.shift()) };
+  const client: LLMClient = { generate: async () => JSON.stringify(answers.shift()) };
   const service = new ProposalService({
     ledger, proposals: ProposalStore.open(":memory:"), timeZone: "America/Sao_Paulo", now: () => clock.now,
     llm: { client, models: ["m"], sleep: async () => undefined }, newId: () => "0000000a",

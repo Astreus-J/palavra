@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadConfig } from "./config.js";
+import { DEFAULT_OPENROUTER_MODELS, loadConfig } from "./config.js";
 
 test("defaults: mock mode, no keys", () => {
   const cfg = loadConfig({});
@@ -38,7 +38,7 @@ test("REMINDER_HOUR defaults to 9 and must be an hour of the day", () => {
   for (const bad of ["24", "-1", "9.5", "nine"]) assert.throws(() => loadConfig({ REMINDER_HOUR: bad }), /Invalid configuration/, bad);
 });
 
-test("the fallback model is optional", () => {
-  assert.equal(loadConfig({}).GEMINI_FALLBACK_MODEL, undefined);
-  assert.equal(loadConfig({ GEMINI_FALLBACK_MODEL: "gemini-3.5-flash" }).GEMINI_FALLBACK_MODEL, "gemini-3.5-flash");
+test("OPENROUTER_MODELS defaults to the free-model chain and can be overridden", () => {
+  assert.equal(loadConfig({}).OPENROUTER_MODELS, DEFAULT_OPENROUTER_MODELS.join(","));
+  assert.equal(loadConfig({ OPENROUTER_MODELS: "a,b" }).OPENROUTER_MODELS, "a,b");
 });

@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { isValidIsoDate } from "../core/fact.js";
-import { isQuotaExhausted, isTransientError, type GeminiClient } from "./gemini.js";
+import { isQuotaExhausted, isTransientError, type LLMClient } from "./openrouter.js";
 
-// Fact extraction: turns one chat message into a structured proposal with Gemini.
+// Fact extraction: turns one chat message into a structured proposal with an LLM (OpenRouter).
 //
 // The model only interprets language. The code decides everything else: dates are validated (a
-// deadline is always a calendar date, YYYY-MM-DD), errors are retried with backoff, a fallback model
-// takes over when the primary keeps failing or answers with something invalid, and when the model has
-// to pick one item among candidates it can only answer with an id from the list (or "none").
+// deadline is always a calendar date, YYYY-MM-DD), errors are retried with backoff, the next model
+// in the chain takes over when one keeps failing or answers with something invalid, and when the
+// model has to pick one item among candidates it can only answer with an id from the list (or "none").
 
 export const EXTRACTION_TYPES = ["DECISION", "COMMITMENT", "AMENDMENT", "COMPLETION", "NONE"] as const;
 export type ExtractionType = (typeof EXTRACTION_TYPES)[number];
@@ -193,8 +193,8 @@ export function parseChoice(text: string, candidates: readonly Candidate[]): str
 // ---- calls with retry and fallback -------------------------------------------------------------
 
 export interface CallOptions {
-  client: GeminiClient;
-  /** Primary model first, then the optional fallback. */
+  client: LLMClient;
+  /** Tried in order; the next model takes over on quota exhaustion or an invalid answer. */
   models: readonly string[];
   /** Waits between retries of a transient error on the same model (default 0.6 s, 2 s, 3 s). */
   retryDelaysMs?: readonly number[];

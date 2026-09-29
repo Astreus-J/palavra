@@ -4,7 +4,7 @@ How a chat message becomes a fact. The model only interprets language; **code de
 Rules come from [PRODUCT.md](PRODUCT.md) (A1-A6, M1-M6, D8-D10, T1-T3).
 
 ```
-message ─▶ extraction (Gemini, JSON schema) ─▶ proposal (stored, expires in 24 h)
+message ─▶ extraction (OpenRouter, JSON schema) ─▶ proposal (stored, expires in 24 h)
                                                    │  ✅ by an allowed person
                                                    ▼
                                      fact in the ledger ─▶ outbox ─▶ Walrus
@@ -15,21 +15,23 @@ Nothing reaches the ledger or Walrus until the right person presses ✅.
 ## Code map
 | File | Role |
 |---|---|
-| `src/llm/gemini.ts` | thin `@google/genai` client; `isTransientError` |
-| `src/llm/extraction.ts` | prompt, JSON schema, strict validation, retry + fallback model, candidate choice |
+| `src/llm/openrouter.ts` | thin OpenRouter client (`fetch`, OpenAI-compatible); `isTransientError` |
+| `src/llm/extraction.ts` | prompt, JSON schema, strict validation, retry + model chain, candidate choice |
 | `src/core/owner.ts` | rule A1: does a Telegram user match an owner name? |
 | `src/core/proposals.ts` | `ProposalService.propose` / `confirm`, `ProposalStore` (SQLite, survives restarts) |
 | `src/bot/messages.ts` | every user-facing text and the callback data (wording is task HACKATONSU-23) |
 | `src/bot/proposals-bot.ts` | Telegram inline buttons and the press handler |
 
 ## Extraction
-- Output is validated twice: the JSON schema sent to Gemini (`due` constrained to `YYYY-MM-DD`) and a strict parser in code.
+- Output is validated twice: the schema is spelled out in the prompt (`due` constrained to `YYYY-MM-DD`) and
+  a strict parser checks it again in code.
 - `due` is always a calendar date. A date-time returned by mistake is reduced to its date; anything else that
   is not a real calendar date is rejected.
 - The prompt states today's date **with its weekday** (in the group's timezone, from the message time: rule T2)
   and the deadline rules D1-D9.
 - **Retry:** transient errors (503, 429, network) are retried on the same model after 0.6 s, 2 s, 3 s.
-  **Fallback:** when the primary keeps failing, or answers with something invalid, `GEMINI_FALLBACK_MODEL` takes over.
+  **Fallback:** when a model keeps failing, or answers with something invalid, the next model in
+  `OPENROUTER_MODELS` takes over — a chain of free models, not just one backup (decision D-05).
   When every model fails an `ExtractionError` carries all the causes and nothing is stored.
 
 ## Choosing the target of an amendment or completion (M3)

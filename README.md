@@ -17,7 +17,7 @@ Built by ParaDevs for **Walrus Sessions 8: Chatbots That Remember**
 - One namespace per group (`grp:<chat_id>`) under a single Walrus Memory account.
 - Structured facts (`DECISION`, `COMMITMENT`, `AMENDMENT`, `COMPLETION`) linked by `supersedes`.
 - A local SQLite ledger is a **cache that can be rebuilt from Walrus**, never the only source.
-- LLM: Gemini (the "Beyond the Big Two" track), used only to interpret natural language.
+- LLM: OpenRouter, a chain of free models (the "Beyond the Big Two" track), used only to interpret natural language.
 
 Details: [docs/DESIGN.md](docs/DESIGN.md), [docs/FACT-MODEL.md](docs/FACT-MODEL.md), [docs/HACKATHON.md](docs/HACKATHON.md),
 [docs/DELIVERABLES.md](docs/DELIVERABLES.md), [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EXTRACTOR.md](docs/EXTRACTOR.md), [docs/REMINDERS.md](docs/REMINDERS.md).
@@ -42,9 +42,8 @@ npm run dev
 | `MEMWAL_ACCOUNT_ID` | with `real` | account ID of the mainnet account |
 | `MEMWAL_SERVER_URL` | no | relayer (official default) |
 | `TELEGRAM_BOT_TOKEN` | to run the bot | token from @BotFather |
-| `GEMINI_API_KEY` | to run the bot | Google AI Studio key |
-| `GEMINI_MODEL` | to run the bot | model name (decision D-05) |
-| `GEMINI_FALLBACK_MODEL` | no | backup model for persistent errors or invalid output |
+| `OPENROUTER_API_KEY` | to run the bot | key from OpenRouter's dashboard |
+| `OPENROUTER_MODELS` | no | comma-separated free-model chain, tried in order (decision D-05; defaults to the chain in `src/config.ts`) |
 | `DB_PATH` | no | SQLite cache (`./data/palavra.db`) |
 | `DEFAULT_TIMEZONE` | no | `America/Sao_Paulo` |
 | `WALRUSCAN_BLOB_URL` | no | base URL for proof links |
@@ -70,7 +69,7 @@ npm run dev
 ## Layout
 ```
 src/bot/        Telegram: commands, buttons, messages, receipts
-src/llm/        Gemini client and fact extraction
+src/llm/        OpenRouter client and fact extraction
 src/core/       State Resolver, ledger, outbox, proposals
 src/memory/     MemWal wrapper + MemWalMock
 src/reminders/  deterministic deadline reminders

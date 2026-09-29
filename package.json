@@ -21,7 +21,6 @@
     "reminder-demo": "tsx scripts/reminder-demo.ts"
   },
   "dependencies": {
-    "@google/genai": "^2.24.0",
     "@mysten-incubation/memwal": "^0.1.8",
     "@mysten/seal": "^1.4.13",
     "@mysten/sui": "^2.31.3",
