@@ -21,7 +21,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 
 ## C. Per track
 - **Best Chatbot:** everything in A and B
-- **Beyond the Big Two:** Gemini as the only LLM; "model and runtime" + "integration friction" sections in the article and README
+- **Beyond the Big Two:** OpenRouter, a chain of free non-Anthropic/OpenAI models (decision D-05); "model and runtime" + "integration friction" sections in the article and README
 - **Best Article:** publish early (by Oct 7) to leave time for fixes
 - **Promo Prize:** post in third-party spaces (Brazilian dev forums, Dev.to, Reddit outside r/sui and r/walrus, newsletters, unaffiliated Discords). X and Walrus/Sui channels do **not** count. The link goes into the form
 - **Bug Bounty:** ≥3 quality issues on MemWal, opened during the event (by Oct 9), each with reproduction, expected vs. actual, environment (model, runtime, OS, SDK version)

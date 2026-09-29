@@ -51,7 +51,7 @@ Example: `feat(core): add State Resolver`. Reference the task in the body: `Refs
 npm run setup:hooks
 ```
 - `commit-msg`: validates Conventional Commits and English.
-- `pre-commit`: blocks `.env`, key patterns (Sui, Gemini, Telegram, Plane) and non-English text.
+- `pre-commit`: blocks `.env`, key patterns (Sui, Gemini, OpenRouter, Telegram, Plane) and non-English text.
 
 ## Secrets
 Never commit `.env`, keys, seeds or tokens. Document variables in `.env.example`.

@@ -32,7 +32,7 @@ export class ExtractionError extends Error {
   }
 }
 
-/** JSON schema sent to Gemini. `due` is constrained to a date pattern, and validated again in code. */
+/** JSON schema of the expected answer. `due` is constrained to a date pattern, and validated again in code. */
 export const EXTRACTION_SCHEMA = {
   type: "object",
   properties: {
