@@ -1,9 +1,9 @@
-# dependências e build
+# dependencies and build
 node_modules/
 dist/
 coverage/
 
-# segredos e ambiente (NUNCA versionar)
+# secrets and environment (NEVER commit)
 .env
 .env.*
 !.env.example
@@ -12,14 +12,14 @@ coverage/
 wallet*.json
 keystore*
 
-# dados locais
+# local data
 data/
 *.db
 *.db-wal
 *.db-shm
 bugs/logs/
 
-# sistema/editor
+# system/editor
 .DS_Store
 .vscode/
 .idea/
