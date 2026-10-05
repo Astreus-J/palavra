@@ -7,6 +7,7 @@ and can be opened on Walruscan.
 |---|---|---|
 | Restore test (mainnet, 2026-09-25) | Deleting the local SQLite ledger loses nothing: it is rebuilt from Walrus alone and the state is identical (pending list, chains, owners, due dates, blob ids) | [restore-test-2026-09-25.md](restore-test-2026-09-25.md) |
 | Gemini model check | Model choice, measurements and integration friction | [gemini-model-check.md](gemini-model-check.md) |
+| 3-arm eval (2026-10-05) | Genuine memory, not decorative: no-recall 0/10, recall 6/10, resolver 9/10 on the same 10 scenarios | [eval-three-arms-2026-10-05.md](eval-three-arms-2026-10-05.md) |
 
 ## Blobs written so far (account `0x256402a0…92fb`)
 | Source | Blobs |

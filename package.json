@@ -14,7 +14,7 @@
     "start": "node dist/src/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx scripts/test.ts",
-    "eval": "tsx eval/run.ts",
+    "eval": "tsx eval/three-arms.ts",
     "setup:hooks": "git config core.hooksPath .githooks",
     "restore-test": "tsx scripts/restore-test.ts",
     "receipt-demo": "tsx scripts/receipt-demo.ts",
@@ -35,6 +35,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.6.2",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.1"
   }
 }
