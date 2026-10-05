@@ -94,6 +94,7 @@ test("/start says records go to Walrus and cannot be deleted, and that only comm
   assert.match(t, /cannot be edited or deleted/);
   assert.match(t, /only read messages that start with a command or mention me/);
   assert.match(t, /@Recall_paradevs_bot/, "the bot's own name replaces the placeholder");
+  assert.doesNotMatch(t, /\{bot\}/, "every placeholder is replaced, not only the first");
   assert.ok((reply as { html?: boolean }).html);
   assert.equal(textOf(await s.say("/help")), textOf(await s.say("/start")));
   assert.match(START_TEXT, /\/pending/);
