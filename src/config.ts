@@ -27,7 +27,7 @@ const schema = z
     TELEGRAM_BOT_TOKEN: opt(z.string()),
     OPENROUTER_API_KEY: opt(z.string()),
     OPENROUTER_MODELS: z.preprocess(empty, z.string().default(DEFAULT_OPENROUTER_MODELS.join(","))),
-    DB_PATH: z.preprocess(empty, z.string().default("./data/palavra.db")),
+    DB_PATH: z.preprocess(empty, z.string().default("./data/recall.db")),
     DEFAULT_TIMEZONE: z.preprocess(empty, z.string().default("America/Sao_Paulo")),
     REMINDER_HOUR: z.preprocess(empty, z.coerce.number().int().min(0).max(23).default(9)),
     WALRUSCAN_BLOB_URL: z.preprocess(empty, z.string().url().default("https://walruscan.com/mainnet/blob")),

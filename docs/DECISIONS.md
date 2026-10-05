@@ -13,3 +13,4 @@
 | D-09 | New public repository at `github.com/Astreus-J/palavra` | Done | Public repo is mandatory |
 | D-10 | Promo Prize: promote in spaces not affiliated with Walrus/Sui | New | X and r/sui do not count |
 | D-11 | English fact types (`DECISION`, `COMMITMENT`, `AMENDMENT`, `COMPLETION`) and English commands (`/palavra`, `/pending`, `/history`, `/decisions`) | Accepted | Follows D-08 |
+| D-12 | Project renamed from Palavra to **Recall**: repository `github.com/Astreus-J/recall`, command `/recall`, default SQLite file `data/recall.db`, package and client namespace `recall`. The Telegram bot username (`@Palavra_paradevs_bot`) must be changed in BotFather separately; the code reads the username at runtime | Accepted (2026-10-05) | Name chosen by the team. Existing ledger files were renamed locally (it is a rebuildable cache, D-01). Earlier entries (D-04, D-09, and the old-name references in the tasks and evidence) are kept as written, as history |

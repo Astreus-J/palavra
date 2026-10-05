@@ -5,7 +5,7 @@ import { MemoryError, SdkMemoryStore, type MemoryStore } from "./store.js";
 export * from "./store.js";
 
 // Default namespace of the SDK client. Every call passes its own group namespace explicitly.
-const CLIENT_NAMESPACE = "palavra";
+const CLIENT_NAMESPACE = "recall";
 
 /** Builds the store selected by MEMWAL_MODE: "mock" (offline, no keys) or "real" (Walrus mainnet). */
 export function createMemoryStore(cfg: Pick<Config, "MEMWAL_MODE" | "MEMWAL_PRIVATE_KEY" | "MEMWAL_ACCOUNT_ID" | "MEMWAL_SERVER_URL">): MemoryStore {

@@ -53,8 +53,8 @@ export function createOpenRouterClient(apiKey: string): LLMClient {
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://github.com/Astreus-J/palavra",
-          "X-Title": "Palavra",
+          "HTTP-Referer": "https://github.com/Astreus-J/recall",
+          "X-Title": "Recall",
         },
         body: JSON.stringify({
           model,

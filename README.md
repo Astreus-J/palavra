@@ -1,8 +1,9 @@
-# Palavra
+# Recall
 
-> **The group decides. Palavra remembers. Walrus proves it.**
+> **The group decides. Recall remembers. Walrus proves it.**
 
-*Palavra* is Portuguese for "word", as in "you have my word".
+*Recall* is the name of the project, not the Walrus Memory `recall` call it uses to search memories:
+the group's word, brought back when someone needs it.
 
 A group-chat bot that records decisions, commitments, amendments and completions in
 [Walrus Memory](https://docs.wal.app/walrus-memory), resolves the **current state in code**
@@ -44,14 +45,14 @@ npm run dev
 | `TELEGRAM_BOT_TOKEN` | to run the bot | token from @BotFather |
 | `OPENROUTER_API_KEY` | to run the bot | key from OpenRouter's dashboard |
 | `OPENROUTER_MODELS` | no | comma-separated free-model chain, tried in order (decision D-05; defaults to the chain in `src/config.ts`) |
-| `DB_PATH` | no | SQLite cache (`./data/palavra.db`) |
+| `DB_PATH` | no | SQLite cache (`./data/recall.db`) |
 | `DEFAULT_TIMEZONE` | no | `America/Sao_Paulo` |
 | `WALRUSCAN_BLOB_URL` | no | base URL for proof links |
 | `REMINDER_HOUR` | no | hour of the day (0-23) from which deadline reminders are sent (`9`) |
 | `LOG_LEVEL` | no | `info` |
 
 ## Commands (bot)
-`/palavra <text>` record a decision or commitment · `/pending` open commitments ·
+`/recall <text>` record a decision or commitment · `/pending` open commitments ·
 `/history <topic>` change history with proofs · `/decisions` current decisions (P1).
 
 ## Scripts

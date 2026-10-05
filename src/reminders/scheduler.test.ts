@@ -45,7 +45,7 @@ test("an overdue commitment gets ONE reminder, from 9:00 in the group's timezone
   assert.equal(s.sent[0]!.chatId, G);
   assert.equal(
     s.sent[0]!.html,
-    ["⏰ <b>Reminder</b>", "<b>🔴 Overdue (1):</b>\n• Pedro — finish the backend — was due Fri, Sep 25", "Use /palavra to change a deadline or mark something as done. /pending shows everything that is open."].join("\n\n"),
+    ["⏰ <b>Reminder</b>", "<b>🔴 Overdue (1):</b>\n• Pedro — finish the backend — was due Fri, Sep 25", "Use /recall to change a deadline or mark something as done. /pending shows everything that is open."].join("\n\n"),
     "it names the owner, the task and the due date",
   );
 });
@@ -72,7 +72,7 @@ test("Q09: a commitment recorded with a date already in the past still gets its 
 });
 
 test("a restart does not repeat a reminder (the record is in SQLite)", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-reminders-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-reminders-"));
   try {
     const path = join(dir, "r.db");
     const a = setup({ store: ReminderStore.open(path) });

@@ -43,7 +43,7 @@ test("compareSnapshots reports every kind of difference", () => {
 });
 
 test("write facts → delete the SQLite file → rebuild from Walrus → same state (mock)", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-recovery-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-recovery-"));
   try {
     const dbPath = join(dir, "ledger.db");
     const steps: string[] = [];
@@ -71,7 +71,7 @@ test("write facts → delete the SQLite file → rebuild from Walrus → same st
 });
 
 test("the snapshot captures pending list, chains and blob ids", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-recovery-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-recovery-"));
   try {
     const { before } = await runRestoreTest({
       store: createMemoryStore(loadConfig({})), dbPath: join(dir, "l.db"), groupId: "g", facts: buildScenario(NOW, TZ), now: NOW, timeZone: TZ, sleep: async () => undefined,

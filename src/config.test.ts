@@ -12,7 +12,7 @@ test("defaults: mock mode, no keys", () => {
 test("empty values from .env.example fall back to defaults", () => {
   const cfg = loadConfig({ MEMWAL_PRIVATE_KEY: "", DB_PATH: "" });
   assert.equal(cfg.MEMWAL_PRIVATE_KEY, undefined);
-  assert.equal(cfg.DB_PATH, "./data/palavra.db");
+  assert.equal(cfg.DB_PATH, "./data/recall.db");
 });
 
 test("real mode requires the delegate key and the account id", () => {

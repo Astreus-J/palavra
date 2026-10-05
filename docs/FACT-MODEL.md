@@ -1,6 +1,6 @@
 # Fact model v1
 
-A **fact** is the unit of memory Palavra writes to Walrus (one `remember` call per fact).
+A **fact** is the unit of memory Recall writes to Walrus (one `remember` call per fact).
 Implementation: [`src/core/fact.ts`](../src/core/fact.ts). Tests: `src/core/fact.test.ts`.
 
 ## Format

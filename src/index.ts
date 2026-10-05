@@ -124,10 +124,10 @@ async function main(): Promise<void> {
   process.once("SIGINT", () => void stop("SIGINT"));
   process.once("SIGTERM", () => void stop("SIGTERM"));
 
-  log.info({ bot: `@${me.username}`, memory: cfg.MEMWAL_MODE, models, timezone: cfg.DEFAULT_TIMEZONE, reminderHour: cfg.REMINDER_HOUR, db: cfg.DB_PATH }, "Palavra is starting");
+  log.info({ bot: `@${me.username}`, memory: cfg.MEMWAL_MODE, models, timezone: cfg.DEFAULT_TIMEZONE, reminderHour: cfg.REMINDER_HOUR, db: cfg.DB_PATH }, "Recall is starting");
   void flush();
   void remind();
-  await bot.start({ onStart: () => log.info("Palavra is listening") });
+  await bot.start({ onStart: () => log.info("Recall is listening") });
 }
 
 main().catch((error) => {

@@ -9,7 +9,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] Chatbot live on **mainnet**, memory stored exclusively on Walrus
 - [ ] **≥10 blobs** written, with the agent ID as proof
 - [ ] Reachable by real users through at least one channel
-- [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/palavra
+- [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/recall
 - [ ] LLM choice documented (model + runtime)
 - [ ] Airtable submission form + DeepSurge submission
 
@@ -33,7 +33,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] Oct 16: results. If we win, confirm by email and send the wallet within 21 days
 
 ## E. Product deliverables (P0 of the design)
-- [x] Record a decision/commitment (`/palavra`, mention)
+- [x] Record a decision/commitment (`/recall`, mention)
 - [x] Amendment and completion with supersession + button/reply confirmation
 - [x] State Resolver (pure code) + local ledger rebuildable from Walrus
 - [x] `/pending` + deterministic reminders (see docs/REMINDERS.md)
