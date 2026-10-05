@@ -313,7 +313,7 @@ test("M1: an amendment proposal offers ✅ Yes, ➕ It's another one and ✖ No"
   const p = proposal(await s.say(maria, "Actually I'll send it Saturday"));
   const r = renderProposal(p);
   assert.deepEqual(r.buttons.map((b) => b.action), ["yes", "other", "no"]);
-  assert.match(r.text, /Update ".*": Fri, Sep 25 → Sat, Sep 26\?/);
+  assert.match(r.text, /: Fri, Sep 25 → Sat, Sep 26/);
 });
 
 test("M2: a different deliverable of the same owner is a new commitment, not an amendment", async () => {
@@ -356,7 +356,7 @@ test("M3: no open commitment for the owner: offer a new commitment (nothing to a
   const p = proposal(await s.say(maria, "Actually I'll send it Saturday"));
   assert.equal(p.kind, "record-instead");
   const r = renderProposal(p);
-  assert.match(r.text, /I found no open commitment for Maria\. Record it as a new commitment\?/);
+  assert.match(r.text, /I couldn't find an open commitment for Maria\.[\s\S]*Record it as a new commitment\?/);
   assert.deepEqual(r.buttons.map((b) => b.action), ["yes", "no"]);
   const fact = written(s.service.confirm(p.id, maria, "yes"));
   assert.equal(fact.type, "COMMITMENT");
@@ -416,7 +416,7 @@ test("D8: a commitment without a deadline is flagged, and is never overdue", asy
   s.llm.extract({ type: "COMMITMENT", task: "send the logo", due: null });
   const p = proposal(await s.say(maria, "I'll send the logo soon"));
   assert.deepEqual(p.warnings, ["no-deadline"]);
-  assert.match(renderProposal(p).text, /No deadline/);
+  assert.match(renderProposal(p).text, /Due: no deadline/);
   written(s.service.confirm(p.id, maria, "yes"));
   assert.equal(s.state()[0]?.status, "open");
 });

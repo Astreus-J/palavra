@@ -10,7 +10,7 @@ import { escapeHtml } from "./render.js";
 
 export type ReceiptState = "saving" | "retrying" | "saved" | "failed";
 
-export const SAVING_LINE = "⏳ Saving to Walrus…";
+export const SAVING_LINE = "⏳ Saving the record...";
 
 export interface ReceiptView {
   state: ReceiptState;
@@ -45,13 +45,13 @@ export function renderReceipt(row: LedgerRow, o: ReceiptOptions): ReceiptView {
       return {
         state,
         retryFactId: null,
-        text: o.onChain && row.blobId ? `🔗 Saved on Walrus: <a href="${escapeHtml(proofUrl(o.proofBaseUrl, row.blobId))}">proof</a>` : "✅ Saved (test mode: no on-chain proof)",
+        text: o.onChain && row.blobId ? `🔗 Record saved. It will stay in the group history. <a href="${escapeHtml(proofUrl(o.proofBaseUrl, row.blobId))}">Proof</a>` : "✅ Record saved (test mode: no on-chain proof).",
       };
     case "failed":
       return {
         state,
         retryFactId: row.factId,
-        text: "❌ I couldn't save this to Walrus after several tries. It is safe on my side: tap \"Try again\".",
+        text: "⚠️ I couldn't save the record right now. Tap \"Try again\" in a few moments.",
       };
     case "retrying":
       return { state, retryFactId: null, text: `⏳ Still saving to Walrus (retry ${row.attempts})…` };

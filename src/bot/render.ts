@@ -29,7 +29,7 @@ export function pendingLine(item: ItemState): string {
 /** /pending: overdue commitments first and highlighted, then the open ones. Computed by the State Resolver. */
 export function renderPending(items: readonly ItemState[]): string {
   const pending = pendingItems(items);
-  if (pending.length === 0) return "No open commitments. ✅";
+  if (pending.length === 0) return "There are no open items right now. ✅";
   const section = (title: string, list: ItemState[]): string | null => {
     if (list.length === 0) return null;
     const shown = list.slice(0, MAX_LINES);
@@ -65,7 +65,7 @@ function itemHistory(item: ItemState, o: HistoryOptions): string {
   const lines = item.history.map(({ fact }, n) => {
     const details = [fact.due ? `due ${formatDate(fact.due)}` : null, fact.type === "AMENDMENT" && fact.owner ? `owner → ${escapeHtml(fact.owner)}` : null].filter(Boolean).join(", ");
     const blob = o.ledger.getRow(o.groupId, fact.id)?.blobId ?? null;
-    const proof = blob ? `<a href="${escapeHtml(`${o.proofBaseUrl}/${blob}`)}">proof</a>` : "⏳ saving";
+    const proof = blob ? `<a href="${escapeHtml(`${o.proofBaseUrl}/${blob}`)}">Proof</a>` : "⏳ saving the record";
     return `${n + 1}. ${fact.at ? dayIn(fact.at, o.timeZone) : "?"} · ${VERB[fact.type]}${details ? `, ${details}` : ""} · ${proof}`;
   });
   const status = item.kind === "DECISION" ? (item.due ? `Now: due ${formatDate(item.due)}` : "Now: active") : item.status === "completed" ? "Now: completed ✅" : `Now: ${item.status}${item.due ? `, due ${formatDate(item.due)}` : ""}`;

@@ -55,7 +55,7 @@ export function renderReminders(reminders: readonly Reminder[]): string {
     "⏰ <b>Reminder</b>",
     section("🔴 Overdue", reminders.filter((r) => r.kind === "overdue")),
     section("🟡 Due today", reminders.filter((r) => r.kind === "due-today")),
-    "Use /recall to change a deadline or mark something as done. /pending shows everything that is open.",
+    "To change a deadline or mark something as done, use /recall. /pending shows everything that is open.",
   ]
     .filter((part): part is string => part !== null)
     .join("\n\n");

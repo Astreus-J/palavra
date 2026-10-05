@@ -169,7 +169,7 @@ test("if the model cannot be reached the user gets an apology; other errors are 
   const seen: ExtractionError[] = [];
   const logged = { ...s.deps, onExtractionError: (e: ExtractionError) => seen.push(e) };
   const reply = await handleIncoming(logged, { groupId: G, author: maria, text: "/recall x", sentAt: NOW });
-  assert.match((reply[0] as { text: string }).text, /couldn't process that message/);
+  assert.match((reply[0] as { text: string }).text, /couldn't understand what should be recorded/);
   assert.equal(seen.length, 1, "the failure is reported for the logs");
   assert.match(String(seen[0]!.causes[0]), /permission denied/);
   const stub = { ...s.deps, service: { propose: async () => { throw new TypeError("bug"); } } as unknown as ProposalService };
@@ -180,7 +180,7 @@ test("if the model cannot be reached the user gets an apology; other errors are 
 // ---- /pending ---------------------------------------------------------------------------------
 
 test("/pending with nothing open", async () => {
-  assert.equal(textOf(await setup().say("/pending")), "No open commitments. ✅");
+  assert.equal(textOf(await setup().say("/pending")), "There are no open items right now. ✅");
 });
 
 test("/pending lists overdue first and highlighted, then the open ones, from the State Resolver", async () => {
@@ -211,7 +211,7 @@ test("/pending follows amendments and drops completed items", async () => {
   assert.match(textOf(await s.say("/pending")), /Maria — send the budget — due Mon, Sep 28/);
   assert.doesNotMatch(textOf(await s.say("/pending")), /Overdue/);
   s.seed({ id: "k_00000003", type: "COMPLETION", supersedes: "a_00000002", at: "2026-09-24T09:00:00.000Z" });
-  assert.equal(textOf(await s.say("/pending")), "No open commitments. ✅");
+  assert.equal(textOf(await s.say("/pending")), "There are no open items right now. ✅");
 });
 
 test("/pending is per group and escapes HTML in user text", async () => {
@@ -254,8 +254,8 @@ test("/history <topic> shows the chain with a date and a proof status per fact",
     textOf(await s.say("/history budget")),
     [
       "📜 <b>send the budget</b> — Maria",
-      `1. Tue, Sep 22 · committed, due Fri, Sep 25 · <a href="${PROOF}/blobAAA">proof</a>`,
-      "2. Wed, Sep 23 · changed, due Sat, Sep 26 · ⏳ saving",
+      `1. Tue, Sep 22 · committed, due Fri, Sep 25 · <a href="${PROOF}/blobAAA">Proof</a>`,
+      "2. Wed, Sep 23 · changed, due Sat, Sep 26 · ⏳ saving the record",
       "Now: open, due Sat, Sep 26",
     ].join("\n"),
   );
@@ -283,7 +283,7 @@ test("/history matches by task, owner or topic, ignoring case and accents, and n
 test("/history: a decision reads 'Now: due ...'", async () => {
   const s = setup();
   s.seed({ id: "d_00000004", type: "DECISION", topic: "delivery", task: "Delivery date", due: "2026-09-30" });
-  assert.match(textOf(await s.say("/history delivery")), /1\. Tue, Sep 22 · decided, due Wed, Sep 30 · ⏳ saving\nNow: due Wed, Sep 30$/);
+  assert.match(textOf(await s.say("/history delivery")), /1\. Tue, Sep 22 · decided, due Wed, Sep 30 · ⏳ saving the record\nNow: due Wed, Sep 30$/);
 });
 
 test("/history needs a topic, says when nothing matches, is per group and escapes HTML", async () => {
@@ -377,7 +377,7 @@ test("tapping an item shows its history; another group's item is not reachable",
   s.seed({ id: "c_00000009", type: "COMMITMENT", owner: "Other", due: "2026-09-26", task: "secret plan" }, "-999");
   const [reply] = handleHistoryPick(s.deps, G, "c_00000001");
   const t = (reply as { text: string }).text;
-  assert.match(t, /^📜 <b>send the budget<\/b> — Maria\n1\. Tue, Sep 22 · committed, due Fri, Sep 25 · <a href="[^"]*blobAAA">proof<\/a>/);
+  assert.match(t, /^📜 <b>send the budget<\/b> — Maria\n1\. Tue, Sep 22 · committed, due Fri, Sep 25 · <a href="[^"]*blobAAA">Proof<\/a>/);
   assertTelegramHtml(t);
   assert.match((handleHistoryPick(s.deps, G, "c_00000009")[0] as { text: string }).text, /can't find that item anymore/);
   assert.match((handleHistoryPick(s.deps, G, "c_deadbeef")[0] as { text: string }).text, /can't find that item anymore/);

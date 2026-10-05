@@ -45,7 +45,7 @@ test("an overdue commitment gets ONE reminder, from 9:00 in the group's timezone
   assert.equal(s.sent[0]!.chatId, G);
   assert.equal(
     s.sent[0]!.html,
-    ["⏰ <b>Reminder</b>", "<b>🔴 Overdue (1):</b>\n• Pedro — finish the backend — was due Fri, Sep 25", "Use /recall to change a deadline or mark something as done. /pending shows everything that is open."].join("\n\n"),
+    ["⏰ <b>Reminder</b>", "<b>🔴 Overdue (1):</b>\n• Pedro — finish the backend — was due Fri, Sep 25", "To change a deadline or mark something as done, use /recall. /pending shows everything that is open."].join("\n\n"),
     "it names the owner, the task and the due date",
   );
 });
