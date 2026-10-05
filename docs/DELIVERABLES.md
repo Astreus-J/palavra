@@ -3,6 +3,7 @@
 Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by the night of Oct 8.
 
 ## A. Mandatory for eligibility
+- [ ] 18+ (or age of majority locally); not a resident of a sanctioned/restricted jurisdiction; **one submission per person or team**
 - [ ] DeepSurge registration (name, description, contact, GitHub)
 - [ ] Wallet dedicated to the Sessions (WAL-compatible address)
 - [ ] Walrus Memory account on **mainnet** + delegate key (kept server-side)
@@ -12,6 +13,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/recall
 - [ ] LLM choice documented (model + runtime)
 - [ ] Airtable submission form + DeepSurge submission
+- [ ] Walrus Memory feedback form (≥1 bug/friction and ≥1 idea) — this is a **submission requirement**, not a post-submission activity (see official rules)
 
 ## B. Per judging criterion
 1. **Genuine memory:** 3-arm eval (no recall / recall only / recall + resolver)
@@ -23,11 +25,10 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - **Best Chatbot:** everything in A and B
 - **Beyond the Big Two:** OpenRouter, a chain of free non-Anthropic/OpenAI models (decision D-05); "model and runtime" + "integration friction" sections in the article and README
 - **Best Article:** publish early (by Oct 7) to leave time for fixes
-- **Promo Prize:** post in third-party spaces (Brazilian dev forums, Dev.to, Reddit outside r/sui and r/walrus, newsletters, unaffiliated Discords). X and Walrus/Sui channels do **not** count. The link goes into the form
+- **Promo Prize:** post in third-party spaces (Brazilian dev forums, Dev.to, Reddit outside r/sui and r/walrus, newsletters, unaffiliated Discords). X and Walrus/Sui channels do **not** count. The link goes into the form. **Must stay publicly visible at judging time**; winners are picked by the Sponsor on **reach and quality** of the post
 - **Bug Bounty:** ≥3 quality issues on MemWal, opened during the event (by Oct 9), each with reproduction, expected vs. actual, environment (model, runtime, OS, SDK version)
 
 ## D. Post-submission (required)
-- [ ] Walrus Memory feedback form (≥1 bug/friction and ≥1 idea)
 - [ ] Join the Walrus Discord
 - [ ] Share the article on X with @WalrusProtocol and #WalrusMemory
 - [ ] Oct 16: results. If we win, confirm by email and send the wallet within 21 days

@@ -41,7 +41,7 @@ The panel is appointed by the Walrus Foundation; decisions are final.
 | Best Chatbot | 3 | 500 / 250 / 150 | overall evaluation across the 4 criteria |
 | Beyond the Big Two | 2 | 150 each | primary LLM that is not Anthropic or OpenAI; document model, runtime and integration friction. Stacks with Best Chatbot |
 | Best Article | 3 | 100 each | clarity, candor, usefulness for newcomers |
-| **Promo Prize** | 5 | 100 each | promotion in third-party spaces (subreddits, forums, Discords, newsletters, publishing platforms). **Not valid:** X, r/sui, r/walrus or Walrus/Sui-affiliated channels. Must be public at judging time |
+| **Promo Prize** | 5 | 100 each | promotion in third-party spaces (subreddits, forums, Discords, newsletters, publishing platforms). **Not valid:** X, r/sui, r/walrus or Walrus/Sui-affiliated channels. Must be public at judging time. Winners picked by the Sponsor on **reach and quality** of the post |
 | Bug Bounty | 5 | 100 each | quality issues at github.com/MystenLabs/MemWal opened during the event |
 
 Eligible models for Beyond the Big Two: local open-weight models (Llama, Mistral, Qwen, Gemma,
@@ -68,7 +68,10 @@ and actionability.
 - Share the article on X tagging **@WalrusProtocol** with **#WalrusMemory**
 
 ## Links
-- Bug bounty / promo-only (WalForm): https://walform.wal.app/f?formId=0x38a736485349b133604c1caf286d669b4b774d16f0a26120ce839cad245baeef
+- **WalForm** (one shared form, three distinct entry points — Bug Bounty and Promo Prize are separate tracks that happen to reuse this same link, not one combined prize): https://walform.wal.app/f?formId=0x38a736485349b133604c1caf286d669b4b774d16f0a26120ce839cad245baeef
+  - Bug-bounty-only submission (no full chatbot submission)
+  - Promo-only entry (participants who do not submit a chatbot)
+  - Standalone bug report (without the full submission)
 - Issues: https://github.com/MystenLabs/MemWal
 - Discord: https://discord.com/invite/walrusprotocol
 - Terms: https://docs.wal.app/docs/legal/walrus_general_tos · https://docs.wal.app/docs/legal/privacy
