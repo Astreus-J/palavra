@@ -120,7 +120,7 @@ export async function handleIncoming(deps: RouterDeps, msg: Incoming): Promise<R
     switch (command.command) {
       case "start":
       case "help":
-        return [text(START_TEXT.replace("{bot}", deps.botUsername), true)];
+        return [text(START_TEXT.replaceAll("{bot}", deps.botUsername), true)];
       case "recall":
         return command.args === "" ? [text(USAGE_RECALL)] : propose(deps, msg, command.args);
       case "pending":
