@@ -1,7 +1,7 @@
 {
-  "name": "palavra",
+  "name": "recall",
   "version": "0.1.0",
-  "description": "Palavra: collective memory and a commitments ledger for group chats, built on Walrus Memory. Walrus Sessions 8.",
+  "description": "Recall: collective memory and a commitments ledger for group chats, built on Walrus Memory. Walrus Sessions 8.",
   "type": "module",
   "license": "MIT",
   "private": false,

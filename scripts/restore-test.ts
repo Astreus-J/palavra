@@ -79,7 +79,7 @@ npm run restore-test -- --real    # Walrus mainnet: writes ${facts.length} immut
 
 async function main() {
   if (real) log(`REAL mode: this writes ${8} immutable blobs to Walrus mainnet (account ${cfg.MEMWAL_ACCOUNT_ID?.slice(0, 10)}…), group ${groupId}`);
-  const dir = mkdtempSync(join(tmpdir(), "palavra-restore-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-restore-test-"));
   const facts = buildScenario(now, cfg.DEFAULT_TIMEZONE);
   try {
     const result = await runRestoreTest({

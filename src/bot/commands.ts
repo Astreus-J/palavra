@@ -47,13 +47,13 @@ export interface RouterDeps {
   onExtractionError?(error: ExtractionError): void;
 }
 
-export const START_TEXT = `👋 I'm <b>Palavra</b>. I keep your group's word: what you decide, who committed to what, and what changed. And I can prove it later.
+export const START_TEXT = `👋 I'm <b>Recall</b>. I keep your group's word: what you decide, who committed to what, and what changed. And I can prove it later.
 
 <b>How to record something</b>
-Type /palavra followed by a sentence, or mention me (@{bot}). You can write in English or Portuguese. Examples:
-• /palavra I'll send the budget by Friday  (a commitment)
-• /palavra Pedro will finish the backend by the 30th  (a commitment for someone else)
-• /palavra We decided the launch is on October 12  (a decision)
+Type /recall followed by a sentence, or mention me (@{bot}). You can write in English or Portuguese. Examples:
+• /recall I'll send the budget by Friday  (a commitment)
+• /recall Pedro will finish the backend by the 30th  (a commitment for someone else)
+• /recall We decided the launch is on October 12  (a decision)
 • @{bot} actually I'll send it Saturday  (changes a deadline)
 • @{bot} I finished the budget  (marks it as done)
 
@@ -62,21 +62,21 @@ I show what I understood, and <b>nothing is saved until you tap ✅</b>.
 <b>Commands</b>
 /pending: what is still open and what is overdue
 /history: pick an item to see how it changed, with proof
-/palavra: record something (see above)
+/recall: record something (see above)
 
 ⚠️ Everything I record is written to Walrus, a decentralized storage network. Records can be verified by anyone and <b>cannot be edited or deleted</b>. Please don't write passwords or private data.
 
 I only read messages that start with a command or mention me.`;
 
-const USAGE_PALAVRA = `Tell me what to record. Examples:
-/palavra I'll send the budget by Friday
-/palavra We decided the launch is on October 12
-/palavra Pedro will finish the backend by the 30th
+const USAGE_RECALL = `Tell me what to record. Examples:
+/recall I'll send the budget by Friday
+/recall We decided the launch is on October 12
+/recall Pedro will finish the backend by the 30th
 You can write in English or Portuguese.`;
 const NOTHING_TO_RECORD = `I couldn't find a decision, a commitment, a change or a completion in that message.
-Try a full sentence, for example: /palavra I'll send the budget by Friday`;
+Try a full sentence, for example: /recall I'll send the budget by Friday`;
 const NOTHING_RECORDED_YET = `Nothing has been recorded in this group yet.
-Start with something like: /palavra I'll send the budget by Friday`;
+Start with something like: /recall I'll send the budget by Friday`;
 
 /** `/cmd`, `/cmd@bot`, `/cmd args`. Commands addressed to another bot (`/cmd@other`) are ignored. */
 export function parseCommand(text: string, botUsername: string): { command: string; args: string } | null {
@@ -121,8 +121,8 @@ export async function handleIncoming(deps: RouterDeps, msg: Incoming): Promise<R
       case "start":
       case "help":
         return [text(START_TEXT.replace("{bot}", deps.botUsername), true)];
-      case "palavra":
-        return command.args === "" ? [text(USAGE_PALAVRA)] : propose(deps, msg, command.args);
+      case "recall":
+        return command.args === "" ? [text(USAGE_RECALL)] : propose(deps, msg, command.args);
       case "pending":
         return [text(renderPending(resolveState(deps.ledger.entries(msg.groupId), { now: now(), timeZone: deps.timeZone }).items), true)];
       case "history": {
@@ -141,7 +141,7 @@ export async function handleIncoming(deps: RouterDeps, msg: Incoming): Promise<R
 
   const mentioned = stripMention(msg.text, deps.botUsername, msg.entities);
   if (mentioned === null) return []; // ordinary chatter: ignored
-  return mentioned === "" ? [text(USAGE_PALAVRA)] : propose(deps, msg, mentioned);
+  return mentioned === "" ? [text(USAGE_RECALL)] : propose(deps, msg, mentioned);
 }
 
 async function propose(deps: RouterDeps, msg: Incoming, content: string): Promise<Reply[]> {

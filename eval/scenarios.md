@@ -273,13 +273,13 @@ check the **content** listed, not the phrasing.
 | ID | Steps | Expected | Rule |
 |---|---|---|---|
 | Q01 | Ana sends `/start` | notice that records go to Walrus and cannot be deleted | DESIGN §6 |
-| Q02 | Maria: `/palavra I'll send the budget by Friday` → ✅ | proposal shows owner Maria, due Fri; after ✅ a ⏳ receipt, then 🔗 with a Walruscan link that opens | A2, D2 |
+| Q02 | Maria: `/recall I'll send the budget by Friday` → ✅ | proposal shows owner Maria, due Fri; after ✅ a ⏳ receipt, then 🔗 with a Walruscan link that opens | A2, D2 |
 | Q03 | Maria: `@<bot> actually I'll send it Saturday` → ✅ | proposal "Update budget → Sat"; after ✅ `/pending` shows the budget due Sat | M1, A5 |
 | Q04 | Pedro presses ✅ on a proposal created by Maria | toast "Only Maria or an admin can confirm this"; nothing written | A3 |
-| Q05 | Pedro: `/palavra Maria finished the budget` | bot asks Maria to confirm; `/pending` still lists the budget | A4 |
+| Q05 | Pedro: `/recall Maria finished the budget` | bot asks Maria to confirm; `/pending` still lists the budget | A4 |
 | Q06 | Maria presses ✅ on the request from Q05 | budget leaves `/pending`; `/history budget` shows commitment → amendment → completion | A4 |
-| Q07 | Pedro: `/palavra done with the backend` (Pedro has nothing open) | "I found no open commitment for Pedro"; nothing written | M5 |
-| Q08 | Maria: `/palavra I'll send the logo soon` → ✅ | proposal says "no deadline"; the item never shows as overdue | D8 |
+| Q07 | Pedro: `/recall done with the backend` (Pedro has nothing open) | "I found no open commitment for Pedro"; nothing written | M5 |
+| Q08 | Maria: `/recall I'll send the logo soon` → ✅ | proposal says "no deadline"; the item never shows as overdue | D8 |
 | Q09 | Commitment due yesterday (set `due` in the past, D9) then wait for the reminder tick | one reminder for the overdue item, naming the owner | D10 |
 | Q10 | Free question: `@<bot> when is the budget due?` | answer with the current date and at least one Walruscan receipt | DESIGN §5 |
 | Q11 | Stop the bot, delete the SQLite file, run restore, start the bot | `/pending` and `/history budget` match what they showed before | D-01 |

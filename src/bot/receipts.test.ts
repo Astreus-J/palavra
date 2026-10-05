@@ -74,7 +74,7 @@ test("retry callback data round-trips and never collides with the other buttons"
 // ---- storage -----------------------------------------------------------------------------------
 
 test("receipts are stored, listed while unfinished, and survive a restart", () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-receipts-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-receipts-"));
   try {
     const path = join(dir, "r.db");
     const a = ReceiptStore.open(path);

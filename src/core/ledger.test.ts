@@ -135,7 +135,7 @@ test("entries feed the resolver: parsed facts, pending included, ordered by inse
 });
 
 test("data survives closing and reopening the database file", () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-ledger-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-ledger-"));
   try {
     const path = join(dir, "nested", "ledger.db");
     const first = Ledger.open(path);

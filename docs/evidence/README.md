@@ -1,6 +1,6 @@
 # Evidence index
 
-Proof that Palavra works, kept in the repository so judges can verify it. Every blob is on Walrus mainnet
+Proof that Recall works, kept in the repository so judges can verify it. Every blob is on Walrus mainnet
 and can be opened on Walruscan.
 
 | Evidence | What it proves | File |
@@ -19,7 +19,7 @@ and can be opened on Walruscan.
 ## For the article
 Suggested paragraph for the "before/after" section (task HACKATONSU-34):
 
-> **The local cache is disposable.** Palavra keeps a SQLite ledger so it can answer instantly while Walrus
+> **The local cache is disposable.** Recall keeps a SQLite ledger so it can answer instantly while Walrus
 > writes finish (about 30 seconds each). But the ledger is only a cache. In our restore test we wrote eight
 > facts to Walrus mainnet, deleted the SQLite file, and rebuilt the ledger from Walrus alone: the pending
 > list, every chain of amendments, the owners, the due dates and the blob id of each fact came back identical.

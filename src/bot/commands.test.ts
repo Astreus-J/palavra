@@ -9,7 +9,7 @@ import { FakeLlm } from "../test-support/fake-llm.js";
 import { handleHistoryPick, handleIncoming, parseCommand, START_TEXT, stripMention, type Incoming, type Reply } from "./commands.js";
 import { sendReply, toIncoming } from "./telegram.js";
 
-const BOT = "Palavra_paradevs_bot";
+const BOT = "Recall_paradevs_bot";
 const NOW = new Date("2026-09-24T13:00:00Z"); // Thursday, 10:00 in Sao Paulo
 const G = "-100200300";
 const PROOF = "https://walruscan.com/mainnet/blob";
@@ -48,22 +48,22 @@ const textOf = (r: Reply[]): string => {
 
 test("parseCommand: plain, with the bot's name, with arguments; other bots and non-commands are not ours", () => {
   assert.deepEqual(parseCommand("/start", BOT), { command: "start", args: "" });
-  assert.deepEqual(parseCommand("/palavra I'll send the budget", BOT), { command: "palavra", args: "I'll send the budget" });
-  assert.deepEqual(parseCommand("/Pending@palavra_paradevs_bot", BOT), { command: "pending", args: "" });
+  assert.deepEqual(parseCommand("/recall I'll send the budget", BOT), { command: "recall", args: "I'll send the budget" });
+  assert.deepEqual(parseCommand("/Pending@recall_paradevs_bot", BOT), { command: "pending", args: "" });
   assert.deepEqual(parseCommand("/history   budget  ", BOT), { command: "history", args: "budget" });
-  assert.deepEqual(parseCommand("/palavra line one\nline two", BOT), { command: "palavra", args: "line one\nline two" });
+  assert.deepEqual(parseCommand("/recall line one\nline two", BOT), { command: "recall", args: "line one\nline two" });
   assert.equal(parseCommand("/pending@some_other_bot", BOT), null);
   assert.equal(parseCommand("good morning", BOT), null);
   assert.equal(parseCommand("see /pending", BOT), null, "a command must start the message");
 });
 
 test("stripMention finds the bot by entity or by text, ignoring case and other bots", () => {
-  const text = "@Palavra_paradevs_bot actually I'll send it Saturday";
+  const text = "@Recall_paradevs_bot actually I'll send it Saturday";
   assert.equal(stripMention(text, BOT, [{ type: "mention", offset: 0, length: 21 }]), "actually I'll send it Saturday");
-  assert.equal(stripMention("hey @palavra_paradevs_bot done with the backend", BOT), "hey done with the backend");
+  assert.equal(stripMention("hey @recall_paradevs_bot done with the backend", BOT), "hey done with the backend");
   assert.equal(stripMention("hey @someone_else", BOT), null);
-  assert.equal(stripMention("hey @Palavra_paradevs_bot2 hi", BOT), null, "a different handle that merely starts the same");
-  assert.equal(stripMention("@Palavra_paradevs_bot", BOT), "");
+  assert.equal(stripMention("hey @Recall_paradevs_bot2 hi", BOT), null, "a different handle that merely starts the same");
+  assert.equal(stripMention("@Recall_paradevs_bot", BOT), "");
 });
 
 // ---- ignoring ---------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ test("/start says records go to Walrus and cannot be deleted, and that only comm
   assert.match(t, /written to Walrus/);
   assert.match(t, /cannot be edited or deleted/);
   assert.match(t, /only read messages that start with a command or mention me/);
-  assert.match(t, /@Palavra_paradevs_bot/, "the bot's own name replaces the placeholder");
+  assert.match(t, /@Recall_paradevs_bot/, "the bot's own name replaces the placeholder");
   assert.ok((reply as { html?: boolean }).html);
   assert.equal(textOf(await s.say("/help")), textOf(await s.say("/start")));
   assert.match(START_TEXT, /\/pending/);
@@ -102,7 +102,7 @@ test("/start says records go to Walrus and cannot be deleted, and that only comm
 test("/start teaches by example: every kind of record, both languages, and that ✅ saves", async () => {
   const t = textOf(await setup().say("/start"));
   assert.match(t, /How to record something/);
-  assert.match(t, /\/palavra I'll send the budget by Friday {2}\(a commitment\)/);
+  assert.match(t, /\/recall I'll send the budget by Friday {2}\(a commitment\)/);
   assert.match(t, /Pedro will finish the backend by the 30th {2}\(a commitment for someone else\)/);
   assert.match(t, /We decided the launch is on October 12 {2}\(a decision\)/);
   assert.match(t, /actually I'll send it Saturday {2}\(changes a deadline\)/);
@@ -112,33 +112,33 @@ test("/start teaches by example: every kind of record, both languages, and that 
   assert.match(t, /\/history: pick an item/);
 });
 
-// ---- /palavra and mentions --------------------------------------------------------------------
+// ---- /recall and mentions --------------------------------------------------------------------
 
-test("/palavra <text> produces a proposal and writes nothing", async () => {
+test("/recall <text> produces a proposal and writes nothing", async () => {
   const s = setup();
   s.llm.extract({ type: "COMMITMENT", task: "send the budget", due: "2026-09-25" });
-  const [r] = await s.say("/palavra I'll send the budget by Friday");
+  const [r] = await s.say("/recall I'll send the budget by Friday");
   assert.equal(r!.kind, "proposal");
   assert.equal((r as Extract<Reply, { kind: "proposal" }>).proposal.draft.owner, "Maria");
   assert.equal(s.ledger.entries(G).length, 0);
   assert.match(s.llm.requests[0]!.prompt, /Message: I'll send the budget by Friday$/, "the command itself is not sent to the model");
 });
 
-test("a mention works like /palavra, with the mention removed from the text", async () => {
+test("a mention works like /recall, with the mention removed from the text", async () => {
   const s = setup();
   s.llm.extract({ type: "AMENDMENT", owner: "Maria", due: "2026-09-26" });
-  const [r] = await s.say("@Palavra_paradevs_bot actually I'll send it Saturday", maria, { entities: [{ type: "mention", offset: 0, length: 21 }] });
+  const [r] = await s.say("@Recall_paradevs_bot actually I'll send it Saturday", maria, { entities: [{ type: "mention", offset: 0, length: 21 }] });
   assert.equal(r!.kind, "proposal");
   assert.match(s.llm.requests[0]!.prompt, /Message: actually I'll send it Saturday$/);
 });
 
-test("/palavra and a bare mention with no text explain how to use them", async () => {
+test("/recall and a bare mention with no text explain how to use them", async () => {
   const s = setup();
-  for (const bare of ["/palavra", "@Palavra_paradevs_bot"]) {
+  for (const bare of ["/recall", "@Recall_paradevs_bot"]) {
     const t = textOf(await s.say(bare));
     assert.match(t, /Examples:/);
-    assert.match(t, /\/palavra I'll send the budget by Friday/);
-    assert.match(t, /\/palavra We decided the launch is on October 12/);
+    assert.match(t, /\/recall I'll send the budget by Friday/);
+    assert.match(t, /\/recall We decided the launch is on October 12/);
     assert.match(t, /English or Portuguese/);
   }
   assert.equal(s.llm.requests.length, 0);
@@ -147,15 +147,15 @@ test("/palavra and a bare mention with no text explain how to use them", async (
 test("a message with nothing to record gets a short answer", async () => {
   const s = setup();
   s.llm.extract({ type: "NONE" });
-  const t = textOf(await s.say("/palavra good morning"));
+  const t = textOf(await s.say("/recall good morning"));
   assert.match(t, /couldn't find a decision, a commitment, a change or a completion/);
-  assert.match(t, /Try a full sentence, for example: \/palavra I'll send the budget by Friday/);
+  assert.match(t, /Try a full sentence, for example: \/recall I'll send the budget by Friday/);
 });
 
 test("M5: a completion with no open commitment is answered, not recorded", async () => {
   const s = setup();
   s.llm.extract({ type: "COMPLETION", owner: "Pedro", task: "backend" });
-  assert.equal(textOf(await s.say("/palavra Pedro finished the backend")), "I found no open commitment for Pedro.");
+  assert.equal(textOf(await s.say("/recall Pedro finished the backend")), "I found no open commitment for Pedro.");
   assert.equal(s.ledger.entries(G).length, 0);
 });
 
@@ -164,16 +164,16 @@ test("if the model cannot be reached the user gets an apology; other errors are 
   s.llm.failWith = new Error("403 permission denied");
   const quotaErr = new ExtractionError("out of quota", [new Error("429 RESOURCE_EXHAUSTED GenerateRequestsPerDayPerProjectPerModel-FreeTier")]);
   const outOfQuota = { ...s.deps, service: { propose: async () => { throw quotaErr; } } as unknown as ProposalService };
-  const quotaReply = await handleIncoming(outOfQuota, { groupId: G, author: maria, text: "/palavra x", sentAt: NOW });
+  const quotaReply = await handleIncoming(outOfQuota, { groupId: G, author: maria, text: "/recall x", sentAt: NOW });
   assert.match((quotaReply[0] as { text: string }).text, /reached my daily limit of AI requests/, "the user is told why");
   const seen: ExtractionError[] = [];
   const logged = { ...s.deps, onExtractionError: (e: ExtractionError) => seen.push(e) };
-  const reply = await handleIncoming(logged, { groupId: G, author: maria, text: "/palavra x", sentAt: NOW });
+  const reply = await handleIncoming(logged, { groupId: G, author: maria, text: "/recall x", sentAt: NOW });
   assert.match((reply[0] as { text: string }).text, /couldn't process that message/);
   assert.equal(seen.length, 1, "the failure is reported for the logs");
   assert.match(String(seen[0]!.causes[0]), /permission denied/);
   const stub = { ...s.deps, service: { propose: async () => { throw new TypeError("bug"); } } as unknown as ProposalService };
-  await assert.rejects(handleIncoming(stub, { groupId: G, author: maria, text: "/palavra x", sentAt: NOW }), TypeError);
+  await assert.rejects(handleIncoming(stub, { groupId: G, author: maria, text: "/recall x", sentAt: NOW }), TypeError);
   assert.ok(new ExtractionError("x") instanceof Error);
 });
 
@@ -355,7 +355,7 @@ test("/history with no topic shows only the latest 8, and completed items are li
 
 test("/history with no topic in an empty group says how to start", async () => {
   const [reply] = await setup().say("/history");
-  assert.match((reply as { text: string }).text, /Nothing has been recorded in this group yet\.\nStart with something like: \/palavra/);
+  assert.match((reply as { text: string }).text, /Nothing has been recorded in this group yet\.\nStart with something like: \/recall/);
   assert.equal((reply as { buttons?: unknown }).buttons, undefined);
 });
 

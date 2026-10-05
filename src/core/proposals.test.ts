@@ -289,7 +289,7 @@ test("A6: expireDue closes every pending proposal past its time", async () => {
 });
 
 test("pending proposals survive a restart (SQLite)", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "palavra-proposals-"));
+  const dir = mkdtempSync(join(tmpdir(), "recall-proposals-"));
   try {
     const path = join(dir, "p.db");
     const first = setup(ProposalStore.open(path));

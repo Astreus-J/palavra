@@ -1,6 +1,6 @@
-# Palavra — design
+# Recall — design
 
-Thesis: *the group decides, Palavra remembers, Walrus proves it.*
+Thesis: *the group decides, Recall remembers, Walrus proves it.*
 This document fixes what would break during implementation and cuts scope to fit the
 deadline (Oct 9, 2026).
 
@@ -74,7 +74,7 @@ order, never by text (a real problem reported with second-level ties in recall r
 ## 5. Scope by priority
 
 **P0 (required to compete):**
-- `/palavra <text>` and mention → record a decision/commitment.
+- `/recall <text>` and mention → record a decision/commitment.
 - Amendment and completion with supersession + confirmation.
 - `/pending` (deterministic) and overdue reminders (in-process scheduler).
 - `/history <topic>` with the change chain and Walruscan receipts.
@@ -82,7 +82,7 @@ order, never by text (a real problem reported with second-level ties in recall r
 - `npm run eval` (3 arms) and a mainnet report with real blobs.
 
 **P1 (if time allows):** `/decisions` (overall state) using `DECISION` with an explicit topic
-key (`/palavra delivery: 09/30`), with no entity inference.
+key (`/recall delivery: 09/30`), with no entity inference.
 
 **P2 (after submission):** WhatsApp, web dashboard, several groups per user.
 
@@ -122,7 +122,7 @@ the open MemWal issues to avoid duplicates.
 
 ## 9. Demo script (3 minutes)
 
-1. A group of 3 people. Maria: "/palavra I'll send the budget by Friday".
+1. A group of 3 people. Maria: "/recall I'll send the budget by Friday".
 2. The bot confirms, shows ⏳ and then 🔗 (opens the blob on Walruscan).
 3. Maria: "Actually I'll send it Saturday" → button → state updated; history shows both.
 4. Restart the bot, delete SQLite, run `restore` → the state comes back.
