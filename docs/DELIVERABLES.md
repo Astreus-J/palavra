@@ -5,13 +5,13 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 ## A. Mandatory for eligibility
 - [ ] 18+ (or age of majority locally); not a resident of a sanctioned/restricted jurisdiction; **one submission per person or team**
 - [ ] DeepSurge registration (name, description, contact, GitHub)
-- [ ] Wallet dedicated to the Sessions (WAL-compatible address)
-- [ ] Walrus Memory account on **mainnet** + delegate key (kept server-side)
-- [ ] Chatbot live on **mainnet**, memory stored exclusively on Walrus
-- [ ] **≥10 blobs** written, with the agent ID as proof
-- [ ] Reachable by real users through at least one channel
-- [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/recall
-- [ ] LLM choice documented (model + runtime)
+- [x] Wallet dedicated to the Sessions (WAL-compatible address): `0x982907ba…6f91` (docs/ACCOUNTS.md)
+- [x] Walrus Memory account on **mainnet** + delegate key (kept server-side): account `0x256402a0…92fb`, 21 memories across 6 namespaces (verified live 2026-10-05)
+- [x] Chatbot live on **mainnet**, memory stored exclusively on Walrus: Railway service `recall`, `MEMWAL_MODE=real`; production write confirmed on Walruscan (see the chat with the user for the blob link)
+- [x] **≥10 blobs** written, with the agent ID as proof: 21 memories on account `0x256402a0…92fb` (verified live 2026-10-05; re-check the count right before submission, since the number keeps growing with real use)
+- [x] Reachable by real users through at least one channel: Telegram, test group
+- [x] **Public** GitHub repository with reproducible setup: https://github.com/Astreus-J/recall (verified 2026-10-05: opens unauthenticated, `npm install && npm test` from a fresh clone passes 254/254 in seconds, well under the README's "≤10 min" claim)
+- [x] LLM choice documented (model + runtime): OpenRouter, 7-model free chain, decision D-05
 - [ ] Airtable submission form + DeepSurge submission
 - [ ] Walrus Memory feedback form (≥1 bug/friction and ≥1 idea) — this is a **submission requirement**, not a post-submission activity (see official rules)
 
