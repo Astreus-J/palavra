@@ -48,10 +48,10 @@ test("a press by the author writes the fact, edits the message and calls the hoo
   const { ctx, log } = fakeCtx(callbackData(p.id, "yes"), MARIA);
   await handleProposalCallback(ctx, s.service, notAdmin, { onWritten: (f, _p, target) => { written.push(f); targets.push(target); } });
   assert.deepEqual(log.answers, [texts.written]);
-  assert.match(log.edits[0]!, /^✅ Recorded\nMaria committed to send the budget\.[^\n]*\n⏳ Saving to Walrus…$/, "phase one of the receipt is shown at once");
+  assert.match(log.edits[0]!, /^✅ Recorded\.\nMaria committed to send the budget\.[^\n]*\n⏳ Saving the record\.\.\.$/, "phase one of the receipt is shown at once");
   assert.deepEqual(log.html, [true], "the edit is HTML so the receipt link can be added later");
   assert.equal(written.length, 1);
-  assert.deepEqual(targets, [{ chatId: G, messageId: 42, baseHtml: log.edits[0]!.replace("\n⏳ Saving to Walrus…", "") }]);
+  assert.deepEqual(targets, [{ chatId: G, messageId: 42, baseHtml: log.edits[0]!.replace("\n⏳ Saving the record...", "") }]);
   assert.equal(s.ledger.entries(G).length, 1);
 });
 
@@ -140,7 +140,7 @@ test("the keyboard has one button per action with the proposal id in the callbac
   const p = await s.propose();
   const kb = inlineKeyboardFor(p.id, renderProposal(p));
   const buttons = kb.inline_keyboard.flat().map((b) => ("callback_data" in b ? [b.text, b.callback_data] : []));
-  assert.deepEqual(buttons, [["✅ Yes", "p:0000000a:y"], ["✖ No", "p:0000000a:n"]]);
+  assert.deepEqual(buttons, [["Register", "p:0000000a:y"], ["Cancel", "p:0000000a:n"]]);
 });
 
 test("sendProposal replies to the original message with the buttons", async () => {
@@ -149,7 +149,7 @@ test("sendProposal replies to the original message with the buttons", async () =
   const sent: { chat: unknown; text: string; opts: any }[] = [];
   await sendProposal({ sendMessage: (async (chat: unknown, text: string, opts: unknown) => { sent.push({ chat, text, opts }); }) as never }, G, 77, p);
   assert.equal(sent.length, 1);
-  assert.match(sent[0]!.text, /^Record this commitment\?/);
+  assert.match(sent[0]!.text, /^Got it, a commitment:/);
   assert.equal(sent[0]!.opts.reply_parameters.message_id, 77);
   assert.equal(sent[0]!.opts.reply_markup.inline_keyboard[0].length, 2);
 });
