@@ -80,7 +80,7 @@ export function registerHandlers(bot: Bot, deps: HandlerDeps): void {
       deps.onHandled?.({ chatId: String(ctx.chat.id), userId: `tg:${message.from.id}`, kind: text.startsWith("/") ? (text.split(/[\s@]/)[0] ?? "/") : "mention", replies: replies.map((r) => (r.kind === "proposal" ? `proposal:${r.proposal.kind}` : "text")) });
     } catch (error) {
       onError(error, "message");
-      await ctx.reply("Sorry, something went wrong. Please try again.", { reply_parameters: { message_id: message.message_id } }).catch(() => undefined);
+      await ctx.reply("⚠️ I couldn't complete this action right now. Try again.", { reply_parameters: { message_id: message.message_id } }).catch(() => undefined);
     }
   });
 

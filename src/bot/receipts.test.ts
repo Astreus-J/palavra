@@ -13,7 +13,7 @@ import { parseRetryCallback, ReceiptStore, ReceiptUpdater, receiptState, renderR
 const T0 = new Date("2026-09-25T20:00:00Z");
 const G = "-5230162759";
 const PROOF = "https://walruscan.com/mainnet/blob";
-const BASE = "✅ Recorded\nMaria committed to send the budget. Due 2026-09-30.";
+const BASE = "✅ Recorded.\nMaria committed to send the budget. Due 2026-09-30.";
 const fact = (over: Partial<Fact> = {}): Fact => ({
   id: "c_00000001", type: "COMMITMENT", supersedes: null, author: "tg:1", owner: "Maria", due: "2026-09-30", topic: null, task: "send the budget", at: "2026-09-25T20:00:00.000Z",
   text: "Maria committed to send the budget. Due 2026-09-30.", ...over,
@@ -35,15 +35,15 @@ test("the state of a receipt follows the write: saving → retrying → saved, o
 
 test("phase one is ⏳; phase two is a 🔗 link that opens the blob on Walruscan", () => {
   assert.deepEqual(renderReceipt(row(), live), { state: "saving", text: SAVING_LINE, retryFactId: null });
-  assert.equal(SAVING_LINE, "⏳ Saving to Walrus…");
+  assert.equal(SAVING_LINE, "⏳ Saving the record...");
   const saved = renderReceipt(row({ status: "done", blobId: "rl8jl4Mp_x-Y" }), live);
-  assert.equal(saved.text, '🔗 Saved on Walrus: <a href="https://walruscan.com/mainnet/blob/rl8jl4Mp_x-Y">proof</a>');
+  assert.equal(saved.text, '🔗 Record saved. It will stay in the group history. <a href="https://walruscan.com/mainnet/blob/rl8jl4Mp_x-Y">Proof</a>');
   assert.equal(saved.retryFactId, null);
 });
 
 test("in test mode there is no on-chain proof to link to, and the text says so", () => {
   const saved = renderReceipt(row({ status: "done", blobId: "mock-blob-000001" }), { ...live, onChain: false });
-  assert.equal(saved.text, "✅ Saved (test mode: no on-chain proof)");
+  assert.equal(saved.text, "✅ Record saved (test mode: no on-chain proof).");
   assert.doesNotMatch(saved.text, /href/);
 });
 
@@ -52,7 +52,7 @@ test("a write that keeps failing shows a clear message with a retry, and a retry
   assert.equal(retrying.text, "⏳ Still saving to Walrus (retry 3)…");
   assert.equal(retrying.retryFactId, null);
   const failed = renderReceipt(row({ status: "failed", attempts: 8, lastError: "relayer down" }), live);
-  assert.match(failed.text, /^❌ I couldn't save this to Walrus after several tries\. It is safe on my side: tap "Try again"\.$/);
+  assert.match(failed.text, /^⚠️ I couldn't save the record right now\. Tap "Try again" in a few moments\.$/);
   assert.equal(failed.retryFactId, "c_00000001");
   assert.doesNotMatch(failed.text, /relayer down/, "internal errors stay in the logs");
 });
@@ -139,7 +139,7 @@ test("when the blob exists the SAME message is edited once to the 🔗 link, and
   assert.equal(s.edits.length, 1);
   const e = s.edits[0]!;
   assert.deepEqual([e.chatId, e.messageId], [G, 42]);
-  assert.equal(e.text, `${BASE}\n🔗 Saved on Walrus: <a href="https://walruscan.com/mainnet/blob/blobXYZ">proof</a>`);
+  assert.equal(e.text, `${BASE}\n🔗 Record saved. It will stay in the group history. <a href="https://walruscan.com/mainnet/blob/blobXYZ">Proof</a>`);
   assert.equal(e.other.parse_mode, "HTML");
   assert.deepEqual(e.other.reply_markup.inline_keyboard, []);
   assert.equal(await s.updater.refresh(), 0, "no repeated edits");
@@ -156,7 +156,7 @@ test("failure: ⏳ → 'still saving' → an error with a 🔄 button → try ag
   s.ledger.markFailed(r.seq, "relayer unavailable", T0);
   await s.updater.refresh();
   const failed = s.edits.at(-1)!;
-  assert.match(failed.text, /❌ I couldn't save this to Walrus/);
+  assert.match(failed.text, /⚠️ I couldn't save the record/);
   assert.deepEqual(failed.other.reply_markup.inline_keyboard, [[{ text: "🔄 Try again", callback_data: "r:c_00000001" }]]);
 
   assert.equal(await retryFailedFact({ ledger: s.ledger, updater: s.updater, groupId: G, factId: "c_00000001", now: T0 }), "requeued");
@@ -167,7 +167,7 @@ test("failure: ⏳ → 'still saving' → an error with a 🔄 button → try ag
 
   s.ledger.markUploaded(r.seq, "blobOK", T0);
   await s.updater.refresh();
-  assert.match(s.edits.at(-1)!.text, /🔗 Saved on Walrus/);
+  assert.match(s.edits.at(-1)!.text, /🔗 Record saved/);
 });
 
 test("the retry button does nothing for a fact that is not failed", async () => {
@@ -227,7 +227,7 @@ test("end to end: ✅ → ⏳ → the outbox writes → the message becomes 🔗
   assert.equal(await s.updater.refresh(), 0, "before the write: still ⏳, no edit");
   await outbox.flush();
   assert.equal(await s.updater.refresh(), 1);
-  assert.match(s.edits[0]!.text, /🔗 Saved on Walrus: <a href="https:\/\/walruscan\.com\/mainnet\/blob\/mock-blob-000001">proof<\/a>$/);
+  assert.match(s.edits[0]!.text, /🔗 Record saved\. It will stay in the group history\. <a href="https:\/\/walruscan\.com\/mainnet\/blob\/mock-blob-000001">Proof<\/a>$/);
 });
 
 test("end to end in test mode: the message says there is no on-chain proof instead of a dead link", async () => {
@@ -235,5 +235,5 @@ test("end to end in test mode: the message says there is no on-chain proof inste
   s.track();
   await new Outbox({ store: createMemoryStore(loadConfig({})), ledger: s.ledger, sleep: async () => undefined }).flush();
   await s.updater.refresh();
-  assert.ok(s.edits[0]!.text.endsWith("✅ Saved (test mode: no on-chain proof)"));
+  assert.ok(s.edits[0]!.text.endsWith("✅ Record saved (test mode: no on-chain proof)."));
 });

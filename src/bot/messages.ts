@@ -23,11 +23,14 @@ export interface Rendered {
   buttons: Button[];
 }
 
-const YES: Button = { label: "✅ Yes", action: "yes" };
-const NO: Button = { label: "✖ No", action: "no" };
-const OTHER: Button = { label: "➕ It's another one", action: "other" };
+const REGISTER: Button = { label: "Register", action: "yes" };
+const CANCEL: Button = { label: "Cancel", action: "no" };
+const OTHER: Button = { label: "It's another one", action: "other" };
+const CHANGE: Button = { label: "Yes, change it", action: "yes" };
+const COMPLETE: Button = { label: "Complete", action: "yes" };
+const PERMANENT = "⚠️ This record will be permanent and cannot be deleted later.";
 
-const dueLine = (due: string | null) => (due ? `📅 ${formatDate(due)}` : "📅 No deadline");
+const dueLine = (due: string | null) => (due ? `Due: ${formatDate(due)}` : "Due: no deadline");
 const pastWarning = (p: Proposal) => (p.warnings.includes("past-date") ? ["⚠️ This date is in the past"] : []);
 
 /** The message and buttons that ask the group to confirm a proposal. */
@@ -35,26 +38,40 @@ export function renderProposal(p: Proposal): Rendered {
   const d = p.draft;
   switch (p.kind) {
     case "record": {
-      const title = p.factType === "DECISION" ? "Record this decision?" : "Record this commitment?";
-      const lines = [title, ...(d.owner ? [`👤 ${d.owner}`] : []), `📋 ${d.task}`, ...(p.factType === "DECISION" && !d.due ? [] : [dueLine(d.due)]), ...pastWarning(p)];
-      return { text: lines.join("\n"), buttons: [YES, NO] };
+      const isDecision = p.factType === "DECISION";
+      const lines = [
+        isDecision ? "Got it, a decision:" : "Got it, a commitment:",
+        "",
+        `${d.task}`,
+        "",
+        ...(d.owner ? [`Owner: ${d.owner}.`] : []),
+        ...(isDecision && !d.due ? [] : [dueLine(d.due)]),
+        ...pastWarning(p),
+        "",
+        "Shall I record it?",
+        PERMANENT,
+      ];
+      return { text: lines.join("\n"), buttons: [REGISTER, CANCEL] };
     }
     case "record-instead": {
-      const lines = [`I found no open commitment for ${p.subjectName}. Record it as a new commitment?`, `👤 ${d.owner}`, `📋 ${d.task}`, dueLine(d.due), ...pastWarning(p)];
-      return { text: lines.join("\n"), buttons: [YES, NO] };
+      const lines = [`I couldn't find an open commitment for ${p.subjectName}.`, "", `${d.task}`, "", `Owner: ${d.owner}.`, dueLine(d.due), ...pastWarning(p), "", "Record it as a new commitment?"];
+      return { text: lines.join("\n"), buttons: [REGISTER, CANCEL] };
     }
     case "amend": {
       const dueChange = d.due ? `${p.previousDue ? `${formatDate(p.previousDue)} ` : ""}→ ${formatDate(d.due)}` : null;
       const ownerChange = d.owner ? `owner → ${d.owner}` : null;
       const change = [dueChange, ownerChange].filter(Boolean).join(", ") || `→ ${d.task}`;
       if (p.needsOtherConfirmation) {
-        return { text: [`${p.confirmerLabel}, ${p.proposer.name} wants to change "${p.targetLabel}": ${change}. Confirm?`, ...pastWarning(p)].join("\n"), buttons: [YES, NO] };
+        return { text: [`${p.confirmerLabel}, ${p.proposer.name} wants to change "${p.targetLabel}": ${change}. Confirm?`, ...pastWarning(p)].join("\n"), buttons: [REGISTER, CANCEL] };
       }
-      return { text: [`Update "${p.targetLabel}": ${change}?`, ...pastWarning(p)].join("\n"), buttons: [YES, OTHER, NO] };
+      return {
+        text: ["Got it, a change:", "", `${p.targetLabel}: ${change}`, "", "Is this the commitment you want to change?", ...pastWarning(p), "", PERMANENT].join("\n"),
+        buttons: [CHANGE, OTHER, CANCEL],
+      };
     }
     case "complete": {
-      if (p.needsOtherConfirmation) return { text: `${p.confirmerLabel}, ${p.proposer.name} says "${p.targetLabel}" is done. Confirm?`, buttons: [YES, NO] };
-      return { text: `Mark "${p.targetLabel}" as completed?`, buttons: [YES, NO] };
+      if (p.needsOtherConfirmation) return { text: `${p.confirmerLabel}, ${p.proposer.name} says "${p.targetLabel}" is done. Confirm?`, buttons: [REGISTER, CANCEL] };
+      return { text: ["Got it, this commitment is done:", "", `${p.targetLabel}`, "", "Record the completion?", PERMANENT].join("\n"), buttons: [COMPLETE, CANCEL] };
     }
   }
 }
@@ -64,15 +81,23 @@ export function noOpenCommitmentNotice(ownerName: string): string {
 }
 
 export const texts = {
-  cancelled: "✖ Cancelled. Nothing was recorded.",
+  cancelled: "Record cancelled.",
   expired: "This proposal expired, please send it again.",
   alreadyHandled: "This proposal was already handled.",
   notFound: "I can't find this proposal anymore.",
   targetCompleted: "That commitment was completed in the meantime. Nothing was recorded.",
   targetMissing: "I can't find that item anymore. Nothing was recorded.",
   notAllowed: (who: string) => `Only ${who} or an admin can confirm this`,
-  written: "✅ Recorded",
-  couldNotUnderstand: "Sorry, I couldn't process that message right now. Please try again in a moment.",
+  written: "✅ Recorded.",
+  saving: "⏳ Saving the record...",
+  changeSaving: "⏳ Saving the change...",
+  changeSaved: "✅ Change recorded.",
+  completionSaved: "✅ Commitment completed.",
+  noMatchingCommitment: "I couldn't find an open commitment that matches this change.",
+  couldNotUnderstand: "I couldn't understand what should be recorded. Try writing the decision or commitment more directly.",
+  saveFailed: "⚠️ I couldn't save the record right now. Try again in a few moments.",
+  genericError: "⚠️ I couldn't complete this action right now. Try again.",
+  dataUnavailable: "⚠️ I couldn't access this information right now. Try again in a few moments.",
   quotaExhausted: "I've reached my daily limit of AI requests, so I can't read new messages right now. Nothing was lost: please try again later.",
 } as const;
 
