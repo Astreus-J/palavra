@@ -42,7 +42,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 - [ ] Free-form question answered through recall, citing blobs
 - [x] Two-phase receipt (⏳ → 🔗) (live proof in docs/evidence)
 - [x] Recovery test: delete SQLite, `restore`, state comes back (`npm run restore-test`; evidence in docs/evidence)
-- [ ] `npm run eval` + report on mainnet
+- [x] `npm run eval`: 3-arm eval implemented and run offline (evidence in docs/evidence) — [ ] re-run against mainnet memory for the submission report
 - [ ] P1: `/decisions` with an explicit topic key
 
 ## F. Schedule (Sep 24 → Oct 9)
