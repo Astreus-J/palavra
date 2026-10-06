@@ -50,6 +50,8 @@ export interface MemoryStore {
   recall(groupId: string, query: string, options?: RecallOptions): Promise<RecalledMemory[]>;
   /** Rebuilds the relayer's index for the group from Walrus (used to recover a lost local cache). */
   restore(groupId: string): Promise<RestoreSummary>;
+  /** Every group id this account holds memories for (paginates internally). Used to find groups the local ledger has lost. */
+  listGroupIds(): Promise<string[]>;
   health(): Promise<{ ok: boolean; detail?: string }>;
 }
 
@@ -80,6 +82,7 @@ export interface MemWalClient {
     sort?: "relevance" | "recent";
   }): Promise<{ results: { blob_id: string; text: string; distance: number; created_at?: string }[] }>;
   restore(namespace: string, limit?: number): Promise<{ restored: number; skipped: number; failed: number; total: number; truncated: boolean }>;
+  listNamespaces(options?: { cursor?: string; limit?: number }): Promise<{ namespaces: { name: string }[]; next_cursor: string | null; has_more: boolean }>;
   health(): Promise<{ status: string }>;
 }
 
@@ -130,6 +133,25 @@ export class SdkMemoryStore implements MemoryStore {
       return { restored: r.restored, skipped: r.skipped, failed: r.failed, total: r.total, truncated: r.truncated };
     } catch (cause) {
       throw new MemoryError(`restore failed in ${namespace}`, { cause });
+    }
+  }
+
+  async listGroupIds(): Promise<string[]> {
+    const groupIds: string[] = [];
+    let cursor: string | undefined;
+    try {
+      for (;;) {
+        const page = await this.client.listNamespaces({ cursor, limit: 500 });
+        for (const ns of page.namespaces) {
+          if (ns.name.startsWith(NAMESPACE_PREFIX)) groupIds.push(ns.name.slice(NAMESPACE_PREFIX.length));
+        }
+        if (!page.has_more) break;
+        cursor = page.next_cursor ?? undefined;
+        if (cursor === undefined) break; // no checkpoint to continue from, even though more was reported
+      }
+      return groupIds;
+    } catch (cause) {
+      throw new MemoryError("listGroupIds failed", { cause });
     }
   }
 
