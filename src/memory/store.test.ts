@@ -12,6 +12,7 @@ function fakeClient(overrides: Partial<MemWalClient> = {}) {
     async rememberAndWait(...args) { calls.push({ method: "rememberAndWait", args }); return { blob_id: "blob1", namespace: String(args[1]) }; },
     async recall(...args) { calls.push({ method: "recall", args }); return { results: [{ blob_id: "b1", text: "hello", distance: 0.1, created_at: "2026-09-25T10:00:00Z" }] }; },
     async restore(...args) { calls.push({ method: "restore", args }); return { restored: 2, skipped: 1, failed: 0, total: 3, truncated: false }; },
+    async listNamespaces(...args) { calls.push({ method: "listNamespaces", args }); return { namespaces: [], next_cursor: null, has_more: false }; },
     async health() { calls.push({ method: "health", args: [] }); return { status: "ok" }; },
     ...overrides,
   };
@@ -139,6 +140,45 @@ test("SDK errors are wrapped in MemoryError with the cause", async () => {
   for (const run of [() => store.remember("g1", "x"), () => store.recall("g1", "x"), () => store.restore("g1")]) {
     await assert.rejects(run, (e: unknown) => e instanceof MemoryError && e.cause === boom && /grp:g1/.test(e.message));
   }
+});
+
+test("listGroupIds strips the grp: prefix and skips other namespaces", async () => {
+  const { client } = fakeClient({
+    async listNamespaces() {
+      return { namespaces: [{ name: "grp:-100" }, { name: "setup-check" }, { name: "grp:abc" }], next_cursor: null, has_more: false };
+    },
+  });
+  assert.deepEqual(await new SdkMemoryStore(client, "real").listGroupIds(), ["-100", "abc"]);
+});
+
+test("listGroupIds follows has_more until the last page", async () => {
+  let calls = 0;
+  const { client } = fakeClient({
+    async listNamespaces(options) {
+      calls++;
+      if (calls === 1) {
+        assert.equal(options?.cursor, undefined);
+        return { namespaces: [{ name: "grp:1" }], next_cursor: "page2", has_more: true };
+      }
+      assert.equal(options?.cursor, "page2");
+      return { namespaces: [{ name: "grp:2" }], next_cursor: "page2", has_more: false };
+    },
+  });
+  assert.deepEqual(await new SdkMemoryStore(client, "real").listGroupIds(), ["1", "2"]);
+  assert.equal(calls, 2);
+});
+
+test("listGroupIds stops if has_more is true but there is no cursor to continue from", async () => {
+  const { client } = fakeClient({
+    async listNamespaces() { return { namespaces: [{ name: "grp:1" }], next_cursor: null, has_more: true }; },
+  });
+  assert.deepEqual(await new SdkMemoryStore(client, "real").listGroupIds(), ["1"]);
+});
+
+test("listGroupIds wraps an SDK error in MemoryError", async () => {
+  const boom = new Error("relayer down");
+  const { client } = fakeClient({ listNamespaces: async () => { throw boom; } });
+  await assert.rejects(new SdkMemoryStore(client, "real").listGroupIds(), (e: unknown) => e instanceof MemoryError && e.cause === boom);
 });
 
 test("health never throws", async () => {

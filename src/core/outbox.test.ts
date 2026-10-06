@@ -35,6 +35,7 @@ class FakeStore implements MemoryStore {
     return this.stored.filter((s) => s.group === group && s.text === query).map((s) => ({ blobId: s.blobId, text: s.text, distance: 0, createdAt: null }));
   }
   async restore(_group: string): Promise<RestoreSummary> { return { restored: 0, skipped: 0, failed: 0, total: 0, truncated: false }; }
+  async listGroupIds(): Promise<string[]> { return []; }
   async health() { return { ok: true }; }
 }
 
