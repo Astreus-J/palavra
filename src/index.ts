@@ -4,6 +4,7 @@ import { loadConfig, requireBotSecrets } from "./config.js";
 import { Ledger } from "./core/ledger.js";
 import { Outbox } from "./core/outbox.js";
 import { ProposalService, ProposalStore } from "./core/proposals.js";
+import { rebuildLedger } from "./core/rebuild.js";
 import { createOpenRouterClient } from "./llm/openrouter.js";
 import { createMemoryStore } from "./memory/index.js";
 import { ReceiptStore, ReceiptUpdater } from "./bot/receipts.js";
@@ -41,6 +42,27 @@ async function main(): Promise<void> {
   const receipts = ReceiptStore.open(cfg.DB_PATH);
   const reminderStore = ReminderStore.open(cfg.DB_PATH);
   const outbox = new Outbox({ store: memory, ledger, onEvent: (event) => log.warn({ event }, "outbox event") });
+
+  // Self-heal: the local ledger is a disposable cache (decision D-01). If it starts empty for a
+  // group Walrus already has memories for -- a wiped volume, a fresh deploy, a lost disk -- rebuild
+  // that group from Walrus before the bot answers /pending or /history with a false "nothing here".
+  if (cfg.MEMWAL_MODE === "real") {
+    const known = new Set(ledger.groups());
+    const remoteGroups = await withStartupRetry("list Walrus groups", () => memory.listGroupIds(), log);
+    const missing = remoteGroups.filter((groupId) => !known.has(groupId));
+    if (missing.length > 0) {
+      log.warn({ missing }, "local ledger is missing groups Walrus already has memories for; rebuilding");
+      for (const groupId of missing) {
+        try {
+          const report = await rebuildLedger(memory, ledger, groupId);
+          log.info({ groupId, report }, "group rebuilt from Walrus");
+        } catch (error) {
+          log.error({ err: serializeError(error), groupId }, "group rebuild failed; it will stay empty until the next restart or a manual restore");
+        }
+      }
+    }
+  }
+
   const models = secrets.openrouterModels;
   const service = new ProposalService({
     ledger,

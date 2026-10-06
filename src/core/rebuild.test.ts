@@ -107,6 +107,7 @@ test("restore is called until the relayer reports it is complete", async () => {
     recall: (...a) => store.recall(...a),
     health: () => store.health(),
     restore: async () => { calls++; return { restored: 1, skipped: 0, failed: 0, total: 3, truncated: calls < 3 }; },
+    listGroupIds: (...a) => store.listGroupIds(...a),
   };
   const report = await rebuildLedger(flaky, Ledger.open(":memory:"), G, { now: () => NOW });
   assert.equal(report.restoreCalls, 3);
