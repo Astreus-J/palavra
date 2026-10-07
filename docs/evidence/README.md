@@ -9,6 +9,7 @@ and can be opened on Walruscan.
 | Gemini model check | Model choice, measurements and integration friction | [gemini-model-check.md](gemini-model-check.md) |
 | 3-arm eval (2026-10-05) | Genuine memory, not decorative: no-recall 0/10, recall 6/10, resolver 9/10 on the same 10 scenarios | [eval-three-arms-2026-10-05.md](eval-three-arms-2026-10-05.md) |
 | Bug-hunt instrumentation (2026-10-05) | Write latency, recall-after-write, ordering and recall edge cases on the live mainnet account; confirms 2 open MemWal issues (#1086, #1066) and finds no new one | [bug-hunt-2026-10-05.md](bug-hunt-2026-10-05.md) |
+| Bug-hunt instrumentation, round 2 (2026-10-07) | Namespace case-sensitivity and Unicode (NFC/NFD) normalization on the live mainnet account — confirms isolation holds (exact byte matching, no leak); finds no novel issue | [bug-hunt-2026-10-07.md](bug-hunt-2026-10-07.md) |
 
 ## Blobs written so far (account `0x256402a0…92fb`)
 | Source | Blobs |
