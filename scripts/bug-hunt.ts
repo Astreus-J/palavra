@@ -68,6 +68,46 @@ async function probeOrdering(blobA: string, blobB: string) {
   );
 }
 
+/**
+ * Namespaces are documented as "flat, exact matching only, no normalization mentioned" (SKILL.md).
+ * Nobody on the tracker has tested whether the relayer actually enforces byte-exact matching, or
+ * silently folds case / normalizes Unicode -- which would be a namespace-isolation bug, not a
+ * cosmetic one, since two "different" namespaces could see each other's memories.
+ */
+async function probeNamespaceCaseSensitivity() {
+  const lower = `bug-hunt-case-${new Date().toISOString().slice(0, 10)}-lower`;
+  const upper = lower.toUpperCase();
+  const text = `bug-hunt case-sensitivity probe ${Math.random().toString(36).slice(2)}`;
+  await m.rememberAndWait(text, lower, { timeoutMs: 120_000 });
+  const crossCase = await m.recall({ query: text, namespace: upper, limit: 5 });
+  const leaked = crossCase.results.some((x) => x.text === text);
+  log(
+    "namespace-case-sensitivity",
+    `wrote to "${lower}", recalled from "${upper}": ${leaked ? "FOUND the memory (namespaces are NOT case-sensitive)" : "not found (namespaces are case-sensitive, as documented)"}`,
+    leaked ? "novel" : "expected",
+    leaked ? "-" : "docs say namespaces are exact-match; not independently verified by any open issue found",
+  );
+}
+
+async function probeNamespaceUnicodeNormalization() {
+  const stamp = new Date().toISOString().slice(0, 10);
+  // U+00EE (precomposed i-circumflex) vs U+0069 U+0302 (i + combining circumflex): same glyph,
+  // different bytes once encoded. Not a Portuguese letter, so this stays out of the repo's
+  // language hook while still exercising NFC-vs-NFD normalization.
+  const nfc = `bug-hunt-unicode-\u00ee-${stamp}`;
+  const nfd = `bug-hunt-unicode-i\u0302-${stamp}`;
+  const text = `bug-hunt unicode-normalization probe ${Math.random().toString(36).slice(2)}`;
+  await m.rememberAndWait(text, nfc, { timeoutMs: 120_000 });
+  const crossForm = await m.recall({ query: text, namespace: nfd, limit: 5 });
+  const leaked = crossForm.results.some((x) => x.text === text);
+  log(
+    "namespace-unicode-normalization",
+    `wrote to NFC "${nfc}", recalled from visually-identical NFD "${nfd}": ${leaked ? "FOUND the memory (the relayer normalizes Unicode before matching)" : "not found (byte-exact match, as documented)"}`,
+    leaked ? "novel" : "expected",
+    leaked ? "-" : "docs say namespaces are exact-match; not independently verified by any open issue found",
+  );
+}
+
 async function probeRecallEdgeCases() {
   try {
     const r = await m.recall({ query: "bug-hunt", namespace: NAMESPACE, limit: 0 });
@@ -90,6 +130,8 @@ async function main() {
   const w2 = await m.rememberAndWait("bug-hunt ordering probe B", NAMESPACE, { timeoutMs: 120_000 });
   await probeOrdering(blobA, w2.blob_id);
   await probeRecallEdgeCases();
+  await probeNamespaceCaseSensitivity();
+  await probeNamespaceUnicodeNormalization();
 
   const novel = findings.filter((f) => f.verdict === "novel");
   const md = [
