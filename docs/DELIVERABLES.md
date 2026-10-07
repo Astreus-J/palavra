@@ -30,7 +30,7 @@ Final deadline: **2026-10-09 14:00 UTC (11:00 BRT)**. Internal goal: submit by t
 
 ## D. Post-submission (required)
 - [ ] Join the Walrus Discord
-- [ ] Share the article on X with @WalrusProtocol and #WalrusMemory
+- [x] Share the article on X with @WalrusProtocol and #WalrusMemory: https://x.com/ZeninnDev/status/2107627783299936557
 - [ ] Oct 16: results. If we win, confirm by email and send the wallet within 21 days
 
 ## E. Product deliverables (P0 of the design)
